@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="../css/index.css">
+  <script type="text/javascript" src="../../javascript/lib/jquery.js"></script>
+  <title>Dissertation</title>
+</head>
+<body>
+  <script src="/socket.io/socket.io.js"></script>
+
+  <p> Welcome to Monopoly: Essex eddition! </p>
+  {% if noLogin %}
+
+  <div class="intro">
+    <p>Here you can jump straight into a game, but first you have to log in. <br> Dont have an account? No problem! You can sign up here.</p>
+  </div>
+
+  {% else %}
+
+  <div class="returning">
+    <p>Welcome {{userName}}! How about jumping into a game? </p>
+  </div>
+
+  <div class="chatCont">
+    <p>This is the global chat. Everyone whos on this page can see it! <br> Try saying hello!</p>
+    <textarea name="chatBox"  id="chatBox" readonly></textarea>
+    <input name="usermsg" type="text" id="usermsg" size="63">
+    <input type="button" class="chatButton" value="Send!" onclick="sendMsg()"> 
+  </div>
+
+  {% endif %}
+  
+<script>
+  
+  
+
+    var socket = io.connect();
+    socket.on('connect', ()=> {
+          // Connected, let's sign-up for to receive messages for this room
+      socket.emit('room', "generalChat,{{userName}}");
+          
+      socket.on('chat_msg', (msg)=> {
+        $("#chatBox").append(msg + "\n");
+      });
+    });
+  
+
+function sendMsg(){
+  var userName = '{{userName}}';
+  socket.emit('chat_msg', userName +": "+ $('#usermsg').val());
+  $("#chatBox").append( userName +": "+ $('#usermsg').val() + "\n");
+  $('#usermsg').val('')
+};
+
+$(function(){
+  $("#header").load("../html/headAndFoot/header.html"); 
+  $("#footer").load("../html/headAndFoot/footer.html"); 
+});
+</script>
+
+<div id="footer"></div>
+
+</body>
+</html>

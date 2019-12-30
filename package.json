@@ -1,0 +1,25 @@
+{
+  "name": "actualfoldertouse",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "node app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^3.0.7",
+    "body-parser": "^1.19.0",
+    "connect": "^3.7.0",
+    "craftyjs": "^0.9.0",
+    "express": "^4.17.1",
+    "express-session": "^1.17.0",
+    "mongoose": "^5.7.5",
+    "node.js": "0.0.0",
+    "nodemailer": "^6.3.1",
+    "socket.io": "^2.3.0",
+    "socket.io-client": "^2.3.0",
+    "swig": "^1.4.2"
+  }
+}

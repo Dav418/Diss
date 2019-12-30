@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Good job!</title>
+    <link rel="stylesheet" href="../../css/loginSignup.css">
+    <script type="text/javascript" src="../../javascript/lib/jquery.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Handler for .ready() called.
+            window.setTimeout(function () {
+                location.href = "/users/login";
+            }, 5000);
+        });
+    </script>
+</head>
+<body>
+    <h1>Signup complete!</h1>
+    <p>You can now login. If the page does not redirect click <a href="/users/login">here</a></p>
+</body>
+</html>

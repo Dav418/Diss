@@ -1,0 +1,34 @@
+@font-face {
+	font-family: monop;
+	src: url(../font/MONOPOLY_INLINE.ttf);
+}
+
+
+body{
+    background-image: url("../image/background.jpg");
+    background-size:cover;
+}
+
+.chatCont{
+	margin-top: 10%;
+	margin-bottom:10%; 
+	border: 1px solid blue;
+	width:300px;
+    height:400px;
+}
+
+.chatButton{
+    width:20%;
+    margin-left: 30px;
+}
+#chatBox{
+    width:100%;
+    height:80%;
+	margin-bottom: 20px;
+	overflow-y: scroll;
+    resize: none;
+}
+
+#usermsg{
+    width: 60%;
+}

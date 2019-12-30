@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="../../css/loginSignup.css">
+
+  <script src="../../javascript/signupValidate.js"></script>
+
+  <title>Sign up!</title>
+</head>
+<body>
+    <div class="formCenter">
+        <div class="formTopTop"><p>Join Monopoly!</p></div>
+        <div class="formTopBottom"><h1>Signup below!</h1></div>
+    </div>
+  <div class="form-cont">
+    <form action="/users/sign_up" method='POST' onsubmit="return checkForm(this);">
+      <div class="form-group">
+        <lab>Username: <input type="text" id="name" class="form-control"
+          placeholder='Try to think up a good one!' name='name'></lab>
+      </div>
+      <div class="form-group">
+        <lab>Email: <input type="text" id="email" class="form-control"
+          placeholder='name@email.com' name='email'></lab>
+      </div>
+      <div class="form-group">
+        <lab>Password: <input type="password" id="pw" class="form-control"
+         name='password'></lab>
+      </div>
+      <div class="form-group">
+        <lab>Confirm password: <input type="password" id="pw2" class="form-control"
+         name='confirmPassword'></lab>
+      </div>
+      <button class="btnLogSign" type="submit">Sign up!</button>
+    </form>
+  </div>
+    <div class="formCenter">
+      <p>Or if you have an account</p>
+    </div>
+    <div class="form-cont-btm"><form action="/users/login">
+      <button class="btnLogSign" type="submit">Log in!</button>
+    </div></form>
+  
+
+
+
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script type="text/javascript" src="../../javascript/lib/jquery.js"></script>
+    <link rel="stylesheet" href="../css/roomChoose.css">
+    <script>
+        $(document).ready(function () {
+            // Handler for .ready() called.
+            window.setTimeout(function () {
+                location.href = "/board/game";
+            }, 8000);
+        });
+    </script>
+</head>
+<body>
+    <div class="cont">
+        <p>Current rooms: </p>
+        <ul>
+            {% for r in rooms %}
+                {% if r.roomName === "generalChat" %}
+                <li>
+                    "Lobby": {{r.playerNumber}}
+                </li>
+                {% elseif r.playerNumber < 4%}
+                    <li>
+                        <p> "{{r.roomName}}" : {{r.playerNumber}}/4 </p>
+                    </li>
+                {% else %}
+                    <li>"{{r.roomName}}" is full!</li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+        <div class="loader">
+            
+        </div>
+        <p>Joining one of the available rooms. If none are available a new room will be created</p>
+    </div>
+    
+    
+</body>
+</html>

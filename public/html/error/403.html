@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" type="text/css" href="../../css/error.css">
+  <script type="text/javascript" src="../../javascript/lib/jquery.js"></script>
+  <title>403</title>
+  <script>
+    $(document).ready(function () {
+        // Handler for .ready() called.
+        window.setTimeout(function () {
+            location.href = "/users/login";
+        }, 4000);
+    });
+</script>
+</head>
+<body>
+  <div class="main">
+    <div class="topLeft"><p>No acess <br> Redirecting you to the log in page<br> Click <a href="/users/login">here </a>if not redirected </p></div>
+    <div class="mainPage"><p>403</p></div>
+  </div>
+</body>
+</html>

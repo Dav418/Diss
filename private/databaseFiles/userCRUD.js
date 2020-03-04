@@ -1,6 +1,6 @@
 var db = require("./connection.js");
 var userSche = require("./userSchema.js");
-var bcrypt = require("bcrypt");
+var bcrypt = require("bcryptjs");
 var saltRounds = 10;
 
 var mail = require("../javascript/emailDetails.js");
@@ -9,21 +9,28 @@ var mail = require("../javascript/emailDetails.js");
 module.exports = {
 
     readUser : function (name, pass, callback) {
-		userSche.findOne({userName: name} , function(err,u){
-			console.log(u);
-			if(!err) {
-				bcrypt.compare(pass, u.passWord, (err,res)=> {
-					if(res){callback(null, u);}
-					else{console.log("Wrong pass!");}
-				})
+		var q = userSche.findOne({userName: name})
+			
+		q.exec(function(err, u){
+			if(err){callback(err,null)}
+			else if(u == null){
+				err = "Wrong username or password!"
+				callback(err,null);
 			}
 			else{
-				console.log("oh o"+err);
+				bcrypt.compare(pass, u.passWord, (err,res)=> {
+					if(res){
+						callback(null, u);
+					}
+					else{
+						err = "Wrong username or password!"
+						callback(err, null)}
+					})
 			}
 		});
 
 	}, //find a user
-	createUser: function(name, e, pw) {
+	createUser: function(name, e, pw, callback) {
 		bcrypt.hash(pw, saltRounds, (err,hash) => {
 			if (err) {
 				console.log("oh o " + err);
@@ -32,13 +39,10 @@ module.exports = {
 				var newUser = new userSche({userName : name, email : e, passWord : hash});
 				newUser.save( err => {
 					if (err) {
-						console.log("Username already exists!"); 
-						console.log(err);
+						callback(err.keyValue)
 					}
 					else {
-						console.log("  ");
-						console.log("saved " + newUser.userName);
-						mail.eLoginDeetsFirstTime(name,pw);
+						mail.eLoginDeetsFirstTime(name,e);
 					};
 				});
 			};

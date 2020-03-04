@@ -7,13 +7,31 @@
   <link rel="stylesheet" href="../../css/loginSignup.css">
 
   <script src="../../javascript/signupValidate.js"></script>
+  <script type="text/javascript" src="../../javascript/lib/jquery.js"></script>
 
   <title>Sign up!</title>
+  <script> 
+    $(function(){
+      $("#header").load("../html/headAndFoot/header.html"); 
+      $("#footer").load("../html/headAndFoot/footer.html"); 
+
+      var err = "{{error}}"
+      console.log(err)
+      if(err){
+        document.getElementById("name").value = "{{userNam}}"
+        document.getElementById("email").value = "{{em}}"
+      }
+    });
+</script> 
 </head>
 <body>
+    <div id="header"></div>
     <div class="formCenter">
-        <div class="formTopTop"><p>Join Monopoly!</p></div>
+        <div class="formTopTop"><p class="loginP">Join Monopoly!</p></div>
         <div class="formTopBottom"><h1>Signup below!</h1></div>
+        {% if error %}
+        <div class="err"> {{errMsg}} is already in use! </div>
+        {% endif %}
     </div>
   <div class="form-cont">
     <form action="/users/sign_up" method='POST' onsubmit="return checkForm(this);">
@@ -35,14 +53,16 @@
       </div>
       <button class="btnLogSign" type="submit">Sign up!</button>
     </form>
-  </div>
+</div>
     <div class="formCenter">
       <p>Or if you have an account</p>
     </div>
-    <div class="form-cont-btm"><form action="/users/login">
-      <button class="btnLogSign" type="submit">Log in!</button>
-    </div></form>
-  
+    <div class="form-cont-btm">
+      <form action="/users/login">
+       <button class="btnLogSign" type="submit">Log in!</button>
+      </form>
+    </div>
+    <div id="footer"></div>
 
 
 

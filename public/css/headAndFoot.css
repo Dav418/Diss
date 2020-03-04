@@ -15,15 +15,11 @@
 .btn:hover {
     background-color: rgb(167, 204, 172);
 }
-  
-body{
-    background-image: url("../image/background.jpg");
-    background-size:cover;
-  
-}
-
-.cont form,
-.cont form div {
+.cont-header{
+  margin: auto;
+  width: 20%;
+  padding: 2px;}
+.cont > form {
   display: inline;
 }
 .contFoot{

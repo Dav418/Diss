@@ -34,13 +34,14 @@
   {% endif %}
   
 <script>
-  
+  var userName = '{{userName}}';
   
 
     var socket = io.connect();
     socket.on('connect', ()=> {
           // Connected, let's sign-up for to receive messages for this room
-      socket.emit('room', "generalChat,{{userName}}");
+      let obj = {room : "generalChat", name:userName }
+      socket.emit('room', obj);
           
       socket.on('chat_msg', (msg)=> {
         $("#chatBox").append(msg + "\n");
@@ -49,9 +50,7 @@
   
 
 function sendMsg(){
-  var userName = '{{userName}}';
   socket.emit('chat_msg', userName +": "+ $('#usermsg').val());
-  $("#chatBox").append( userName +": "+ $('#usermsg').val() + "\n");
   $('#usermsg').val('')
 };
 

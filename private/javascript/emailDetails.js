@@ -19,12 +19,17 @@ function sendE(mailOptions){
 };
 
 module.exports = {
-	eLoginDeetsFirstTime: function(n,p){
+	eLoginDeetsFirstTime: (name, email)=>{
+		var swig  = require('swig');
+		var tmpl = swig.compileFile("../pages/emailFile/emailFile.html"),
+    		renderedHTML = tmpl({
+				userName : name
+    		});
 		var mailOptions = {
 			from: 'monopolly.dissertation@gmail.com',
-			to: 'gorskidawid98@gmail.com',
+			to: email,
 			subject: 'Here are your login details!',
-			html: '<h1>This is in the header file</h1><p>and this this is a p tag</p>'
+			html: renderedHTML
 		};
 		sendE(mailOptions);
 	},

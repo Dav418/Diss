@@ -1,11 +1,13 @@
 var User = require("../databaseFiles/userCRUD.js");
-var playerFunctions = require("../gameLogic/playerLogic.js")
+var gameLogic = require("../gameLogic/gameLogic.js")
 var roomList = [];
 
 function roomObject(room){
   this.room=room;
-  this.numberOfPlayers = 1;
+  this.numberOfPlayers = 0;
   this.playerList=[];
+  this.isRoomFull = false;
+  this.roomPassword = null;
 
   Object.defineProperties(this,{
     roomName:{
@@ -19,7 +21,6 @@ function roomObject(room){
     },
     addPlayer:{
       set: (p)=> {
-      
         this.playerList.push(p);}
     },
     removePlayer:{
@@ -31,50 +32,101 @@ function roomObject(room){
       get:()=>{
         return this.playerList;
       }
+    },
+    changeRoomStatus:{
+      set:(i)=>{
+        this.isRoomFull = i;
+      }
+    },
+    checkRoom:{
+      get:()=>{
+        return this.isRoomFull
+      }
+    },
+    checkPass:{
+      get:()=>{
+        return this.roomPassword
+      }
+    },
+    assignPass:{
+      set:(i)=>{
+        this.roomPassword = i;
+      }
     }
   })
+}
+
+function startGame(room){
+
+  var players = room.getPlayer;
+  var playerNamesInGame = [];
+  
+  players.forEach(p =>{
+    var name = p.split(',');
+    playerNamesInGame.push(name[0]);
+  
+    var cashPrmise = User.getMoney(name[0]);
+    cashPrmise.then(cash =>{ //take money from each player to start the game
+      User.setMoney(name[0],cash.money - 100);
+    })
+  })
+  gameLogic.initialiseGameRoom(room.roomName,playerNamesInGame)
+  room.changeRoomStatus = true;
+  
 }
 module.exports= {
     getRoomList: ()=>{
       return roomList;
     },
+    assignPlayerTurn:(name)=>{
+      var i = 0;
+      roomList.forEach(element => {
+        if(element.roomName == name)
+        i = element.playerNumber
+      });
+      return i+1;
+    },
+    createPrivateRoom(roomName, password){
+      var i = new roomObject(roomName);
+      i.assignPass = password;
+      roomList.push(i);
+    },
+    checkRoomPassword(roomName, passWrd){
+      let found = false
+      roomList.forEach(element => {
+        if (element.checkPass == passWrd && element.roomName == roomName){
+          found = true;
+        }
+      });
+      return found;
+    },
 
-    assignRoom: (papers,ID)=>{ // papers are room[0] than name[1]
+    assignRoom: (papers,ID)=>{ // papers are room than name than (bool) private
     var found = false;
     
-    roomList.forEach(e => {
-        if(e.roomName == papers[0]){
+    roomList.forEach(e => { // e is the "room" object
+        if(e.roomName == papers.room){
           found = true;
           e.changeNumber = 1;
-          var string = papers[1] + ","+ID
+          var string = papers.name + ","+ID
           e.addPlayer = string;
         }
 
-        if(e.numberOfPlayers == 2){ // when theres 4 players game can start
-          var players = e.getPlayer;
-          var playerNamesInGame = [];
+        //emit socket
+        
 
-          players.forEach(p =>{
-            var name = p.split(',');
-            playerNamesInGame.push(name[0]);
-
-            var cashPrmise = User.getMoney(name[0]);
-            cashPrmise.then(cash =>{ //take money from each player to start the game
-              User.setMoney(name[0],cash.money - 100);
-            })
-          })
-
-          var socketio = require("./socketFunctions.js");
-          socketio.sockets.to(e.roomName).emit("start_game", playerNamesInGame)
-          
+        if(e.numberOfPlayers == 2 && e.roomName != "generalChat" && !e.checkRoom && e.roomName !="roomChoose"){ // when theres x players game can start
+          startGame(e);
         }
     });
     if(!found){
-        var i = new roomObject(papers[0]);
-        var string = papers[1] + ","+ID
+        var i = new roomObject(papers.room);
+        i.changeNumber = 1;
+        var string = papers.name + ","+ID
         i.addPlayer = string;
         roomList.push(i);
     }
+    updateClient();
     },
 
     deleteRoom: (r,ID)=> {
@@ -104,6 +156,16 @@ module.exports= {
         }
     },
 
+    checkIfExists: (i)=> {
+      let bck = false
+      roomList.forEach(e =>{
+        if (e.roomName == i){
+          bck = true;
+        }
+      })
+      return bck;
+    },
+
     printAllRooms: ()=> {
         console.log("roomList: ")
         roomList.forEach(element => {
@@ -111,4 +173,23 @@ module.exports= {
         });
     }
 
+}
+
+function updateClient(){
+  var data = [];
+  roomList.forEach(room => {
+    console.log("Adding: " + room.roomName)
+    if(room.roomName != "generalChat" && room.roomName !="roomChoose" ){
+      var state;
+      if(room.checkPass == null){
+        state = "Public"
+      }else{
+        state = "Private"
+      }
+      var formatedRoom = {roomName :room.roomName, pNumb : room.playerNumber, roomState: state };
+      data.push(formatedRoom);
+    }
+  });
+  var socketio = require("../socketFiles/socketFunctions.js"); 
+  socketio.sockets.to("roomChoose").emit("update_room_data",data);
 }

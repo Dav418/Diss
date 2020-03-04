@@ -33,31 +33,51 @@ router.post('/sign_up', function(req, res, next) {
   var e = req.body.email;
   var pw = req.body.password;
 
-  User.createUser(un, e, pw);
-
-  //redirect
-  res.sendFile("userCreated.html", {root:rootHTML})
-}); // redirect to html file that will send user their data vie email
+  User.createUser(un, e, pw, (err)=>{
+      var tmpl = swig.compileFile(rootHTML+"/signup.html")
+      if(err){
+      renderedHTML = tmpl({
+        error : true,
+        errMsg : err,
+        userNam: un,
+        em: e
+      });
+      res.end(renderedHTML);
+    };
+    
+    res.sendFile("userCreated.html", {root:rootHTML})
+  })
+})
 
 router.get('/signup', function(req, res, next) {
-  res.sendFile('signup.html', {root:  rootHTML});
+  var tmpl = swig.compileFile(rootHTML+"/signup.html")
+      renderedHTML = tmpl({
+        error : false,
+        errMsg : "",
+        userNam: "",
+        em: ""
+      });
+      res.end(renderedHTML);
+    
+    res.sendFile("userCreated.html", {root:rootHTML})
 });
 
 router.post('/log_in', function(req, res,next ) {
   var un = req.body.un;
   var pw = req.body.pw;
 
-  var c =  User.getMoney(un);
- 
-  c.then(info =>{
-    console.log("below c")
-    console.log(info.money)
-    //User.setMoney(un,info.money + 100)
-  })
   User.readUser(un, pw, function(err, u){
-    if(err) console.log("User dont exist!");
-    if(!u) console.log("User dont exist! empty u object");
-    else{ 
+    if(err || !u) {console.log("inside err"); 
+    var tmpl = swig.compileFile(rootHTML+"/login.html"),
+    renderedHTML = tmpl({
+      error : true,
+      errMsg : err,
+      userNam: un
+    });
+    //do tha same but for success
+    
+    res.end(renderedHTML);
+    }else{ 
       var sess = req.session;
       var date = new Date(u.dateCreated);
 
@@ -67,6 +87,7 @@ router.post('/log_in', function(req, res,next ) {
         bDay : date.toDateString(),
         exp : u.exp
       }
+      sess.youMayEnter = false;
 
       req.session.save();
       res.redirect("/users")
@@ -74,11 +95,14 @@ router.post('/log_in', function(req, res,next ) {
   })
 });// redirect to dashboard after user has succesfully logged on
 
-router.get('/login', function(req, res, next) {
-  res.sendFile('login.html',  { root: rootHTML });
-  console.log(rootHTML);
+router.get('/login', function(req, res, next) { 
+  var tmpl = swig.compileFile(rootHTML+"/login.html"),
+  renderedHTML = tmpl({
+    error : false,
+    errMsg : ":)"
+  });
+  
+  res.end(renderedHTML);
 });
-
-
 
 module.exports = router;

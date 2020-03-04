@@ -14,6 +14,11 @@
       $(function(){
         $("#header").load("../html/headAndFoot/header.html"); 
         $("#footer").load("../html/headAndFoot/footer.html"); 
+
+        var err = "{{error}}"
+        if(err){
+          document.getElementById("username").value = "{{userNam}}"
+        }
       });
   </script> 
   
@@ -25,6 +30,9 @@
     <div class="formCenter">
         <div class="formTopTop"><p class="loginP">Welcome back!</p></div>
         <div class="formTopBottom"><h1>Login below!</h1></div>
+        {% if error %}
+        <div class="err">{{errMsg}}</div>
+        {% endif %}
     </div>
 
   <div class="form-cont">

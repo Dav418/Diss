@@ -11,29 +11,52 @@ class Player {
                 get:()=>{
                     return this.id;
                 }
+            },
+            playerPos:{
+                get:()=>{return pos},
+                set:(i)=>{pos = i}
+            },
+            playerMoney:{
+                get:()=>{return money;},
+                set:(i)=>{money = i}
+            },
+            getPlayerName:{
+                get:()=>{return this.name;}
             }
         })
     }
 }
 
-function findPlayer(id){
-    var player = null;
-    playerList.forEach(p => {
-        if(p.getPlayerID == id){
-            player = p;
+
+module.exports= {
+    initialisePlayers:(nameList)=>{
+        var playerList = [];
+        var i = 1;
+        nameList.forEach(player => {
+            var newPlayer = new Player(i,player);
+            playerList.push(newPlayer);
+            i++;
+        });
+        return playerList;
+    },
+    updatePlayerPos:(playerToUpdate, newPos)=>{
+        var currentPos = playerToUpdate.playerPos;
+        var newPosCalc = parseInt(newPos,10) + parseInt(currentPos,10);
+        if(newPosCalc > 39){
+            var rem = parseInt(newPosCalc,10) - parseInt(39,10);
+            newPosCalc = parseInt(rem,10);
         }
-    });
 
-    return player;
-}
+        playerToUpdate.playerPos = newPosCalc;
 
-function initialisePlayers(nameList){
-    var playerList = [];
-    var i = 1;
-    nameList.forEach(player => {
-        var newPlayer = new Player(i,player);
-        playerList.push(newPlayer);
-        i++;
-    });
-    return playerList;
+        return newPosCalc;
+    },
+    swapPlayers:(p1,p2)=>{
+        
+    },
+    updateMoney:(playerToUpdate, howMuchMoney)=>{
+        var currentMoney = playerToUpdate.playerMoney;
+        var updateMoney = parseInt(currentMoney,10) + parseInt(howMuchMoney,10);
+        playerToUpdate.playerMoney = updateMoney;
+    }
 }

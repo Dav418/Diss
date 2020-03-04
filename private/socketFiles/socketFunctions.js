@@ -1,6 +1,8 @@
 
 var roomFunctiions = require("./roomFunctions.js")
 var socket = require("socket.io")
+var dice = require("../gameLogic/diceLogic.js")
+var gameLogic = require("../gameLogic/gameLogic.js")
 module.exports.listen = function(app){
 
     io=socket.listen(app);
@@ -8,14 +10,13 @@ module.exports.listen = function(app){
     io.sockets.on('connection', socket => {
   
         socket.on('room', obj => { // assign the room to the user
-          
             const sessionID = socket.id;
-      
-            var papersPlease = obj.split(",");
-
-            socket.join(papersPlease[0]);
-            roomFunctiions.assignRoom(papersPlease, sessionID);
-            io.sockets.in(papersPlease[0]).emit('chat_msg', 'New user joined the room!');
+            console.log(" ")
+            console.log(obj)
+            console.log(" ")
+            socket.join(obj.room);
+            roomFunctiions.assignRoom(obj, sessionID);
+            socket.to(obj.room).emit('chat_msg', 'New user joined the room!');
             roomFunctiions.printAllRooms();
         });
       
@@ -26,24 +27,36 @@ module.exports.listen = function(app){
           }
         });
         
-        socket.on("dice_roll", msg =>{ // used to sync the dice rolls
-          var keys = Object.keys(socket.rooms);
-          for (var i = 0; i < keys.length; i++) { 
-              socket.to(socket.rooms[keys[i]]).emit('dice_roll', msg);
-          }
-        });
-      
-        socket.on("player_move", msg =>{ // used to sync the dice rolls
-          var keys = Object.keys(socket.rooms);
-          for (var i = 0; i < keys.length; i++) { 
-              socket.to(socket.rooms[keys[i]]).emit('dice_roll', msg);
-          }
-          console.log(msg);
+        socket.on("client_dice_throw", data =>{
+          console.log("Throwing dice")
+          console.log(data);
+          let diceRoll1 = dice.diceThrow();
+          let diceRoll2 = dice.diceThrow();
+          let returnMsg = {
+            roll1:diceRoll1,
+            roll2:diceRoll2,
+            p: data.whoThrow
+          };
+          io.in(data.gRoom).emit('dice_roll', returnMsg);
+          gameLogic.gameTurn(diceRoll1+diceRoll2, data.gRoom)
+        })
+
+        socket.on("userCardsHeld", data =>{
+          console.log(data.cards);
+          var retDat = {cardsToUse: "Array of card pos that can be used" }
+          io.in(data.gRoom).emit("userCardsHeldResp1", retDat);
+        })
+
+        socket.on("checkTile", data =>{
+          console.log("Check_tile: ")
+          console.log(data)
+        })
+
+        socket.on("player_buys_a_prop", data =>{
+          gameLogic.minusMoney(data.playerID, data.room,data.propName)
         });
         
-      
         socket.on('disconnecting', function() { // will do stuff just before disconnecting. to do stuff after dc do socket.on("disconnect")
-      
           var self = Object.keys(this.rooms);
           const sessionID = socket.id;
           roomFunctiions.deleteRoom(self[1],sessionID);

@@ -13,12 +13,13 @@
   padding: 2px;
   
 }
-.formCenter{
+.formCenter > p{
   padding: 5px;
-  
+  text-align: center;
+  font-family: "Comic Sans MS", cursive, sans-serif;
   margin: auto;
 }
-.loginP,h1{
+.loginP,h1,.err{
   text-align: center;
   font-family: "Comic Sans MS", cursive, sans-serif;
 }
@@ -28,6 +29,9 @@ input{
 
 lab{
   font-family: "Comic Sans MS", cursive, sans-serif;
+}
+.err{
+  color: red;
 }
 
 .btnLogSign {

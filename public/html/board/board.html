@@ -6,65 +6,117 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <link rel="stylesheet" href="../css/board.css">
 
+  <script src="../../javascript/lib/jquery.js"></script>
+  <script src="../../javascript/lib/jquery-ui.js"></script>
+  <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"> 
+
+
   <script type="text/javascript" src="../../javascript/signupValidate.js"></script>
   
   <script type="text/javascript" src="../../javascript/diceScript.js"></script>
   <script type="text/javascript" src="../../javascript/playerScripts.js"></script>
-  <script type="text/javascript" src="../../javascript/lib/jquery.js"></script>
+
   <script type="text/javascript" src="../../javascript/cardScript.js"></script>
-  <script type="text/javascript" src="../../javascript/gameLoop.js"></script>
+  <script type="text/javascript" src="../../javascript/propertiesScript.js"></script>
   <script src="../socket.io/socket.io.js"></script>
 <script>    
     var room = "{{room}}";
     var myName = "{{myName}}";
+    var myTurn = "{{myTurn}}";
 
     var socket=io.connect();
     socket.on('connect', ()=> {
-        // Connected, let's sign-up for to receive messages for this room
+        let obj = {
+            room: room,
+            name: myName
+        }
+    
 
-        var obj = room + "," + myName;
-        socket.emit('room', obj);
+        socket.emit('room', obj); //emit what room we are in
+
         
+
         socket.on('chat_msg', (msg)=> {
-            $("#chatBox").append(msg + "\n");
+            appendToConsole(msg)
         });
 
         socket.on("start_game", (msg)=>{
             generatePlayers(msg);
+            appendToConsole("Starting a new game with : " + msg)
+            let name = getPlayerNameByID(whosTurnItIs)
+            appendToConsole("System: It is " + name + "'s turn!")
         });
 
         socket.on('dice_roll', (msg)=> {
-            document.getElementById("dice").src=msg;
+            let name = getPlayerNameByID(msg.p)
+            let totRoll = msg.roll1 + msg.roll2
+            appendToConsole('System: ' + name+ " threw a "+ totRoll + "!")
+            document.getElementById("dice1").src=imgs[msg.roll1-1].src;
+            document.getElementById("dice2").src=imgs[msg.roll2-1].src;
         });
 
         socket.on("move_player", (data) =>{
             movePlayer(data.playerToMove, data.roll);
         });
 
+        socket.on("player_tile_buy", (data)=>{
+            //appendToConsole("System " + data.playerName + " landed on " + data.type)
+           // ConfirmBuyProp("Would you like to buy " + data.name + "?", data.name);
+           if(data.playerName == myName ){
+                var buyProp = confirm("Would you like to buy " + data.name);
+                if(buyProp){
+                    buyThisProp(data.name, myTurn, room)
+                    sendSystemMsg(myName + " has decided to buy " + data.name +"!")
+                }else{
+                    sendSystemMsg(myName + " has declined to buy " + data.name +"!")
+                }
+            }
+        })
+
+       
+
         socket.on("next_turn", (data)=>{
-            var pTurn = data.playerTurn;
+            whosTurnItIs = data.playerTurn;
+            let name = getPlayerNameByID(whosTurnItIs)
+            appendToConsole("System: It is " + name + "'s turn!")
             var gTurn = data.turnNum;
-            setTheDice(pTurn);
         });
 
+        socket.on("this_player_can_throw", (i) =>{
+            if(myTurn == i){
+                $('diceButton').prop('disabled', false);
+            }else{
+                $('diceButton').prop('disabled', true);
+            }
+        })
     
 
 });
+function sendMsg(){
+    socket.emit('chat_msg',myName + ": " +  $('#usermsg').val());
+    appendToConsole(myName + ": " +  $('#usermsg').val())
+    $('#usermsg').val('')
+}
 
+function sendSystemMsg(msg){
+    socket.emit('chat_msg',"System: " + msg);
+    appendToConsole("System: " + msg)
+}
 
-    function sendMsg(){
-        socket.emit('chat_msg', $('#usermsg').val());
-        $("#chatBox").append( $('#usermsg').val() + "\n");
-        $('#usermsg').val('')
-    }
+function appendToConsole(msg){
+    $("#chatBox").append(msg + "\n");
+}
 
+function test1(){
+    $("#dialog-Buy-Prop").dialog ("open");
+}
 
 </script>
 
 <script> 
-    $(function(){
-      $("#header").load("../html/headAndFoot/header.html"); 
-      $("#footer").load("../html/headAndFoot/footer.html"); 
+    $( document ).ready(function() {
+        $("#header").load("../html/headAndFoot/header.html"); 
+        $("#footer").load("../html/headAndFoot/footer.html"); 
     });
 </script> 
 
@@ -88,8 +140,6 @@
                         <div class="topNine">9 <div class="place29"></div><div class="barYel"></div></div>
                         <div class="topRight"><div class="place30"></div></div>
                             
-            
-                            
                         <div class="midLeftOne">1 <div class="place19"></div><div class="barOrg"></div></div>                            
                         <div class="midLeftTwo">2 <div class="place18"></div><div class="barOrg"></div></div>
                         <div class="midLeftThree">3 <div class="place17"></div></div>
@@ -99,8 +149,7 @@
                         <div class="midLeftSeven">7 <div class="place13"></div><div class="barPur"></div></div>
                         <div class="midLeftEight">8 <div class="place12"></div></div>
                         <div class="midLeftNine">9 <div class="place11"></div><div class="barPur"></div></div>
-            
-            
+                       
                         <div class="btmLeft"> <div class="place10"> <div class="jail"></div></div></div>
                         <div class="btmOne">1 <div class="place9"></div><div class="barTur"></div></div>
                         <div class="btmTwo">2 <div class="place8"></div><div class="barTur"></div></div>
@@ -112,8 +161,7 @@
                         <div class="btmEight">8 <div class="place2"></div></div>
                         <div class="btmNine">9 <div class="place1"></div><div class="barBrw"></div></div>
                         <div class="btmRight"><div class="place0" ></div></div>
-            
-            
+                     
                         <div class="midRightOne">1 <div class="place31"></div><div class="barGre"></div></div>                            
                         <div class="midRightTwo">2 <div class="place32"></div><div class="barGre"></div></div>
                         <div class="midRightThree">3 <div class="place33"></div></div>
@@ -131,8 +179,7 @@
                             </div>
             
                             <h1 class="title">MONOPOLY</h1>
-                           
-            
+                                       
                             <div class="chance-deck">
                                 <h2 class="deck-name">Chance</h2>
                                 <div class="deckCha"></div>
@@ -143,10 +190,14 @@
         </div>
         <div class="rightCont">
             <div class="diceCont" id="diceCont">
-                <input type="image" id="dice" class="dice" src="../image/dice/dice1.JPG" 
-                onclick="throwDice()">
+                <img id="dice1" class="dice" src="../image/dice/dice1.JPG">
+                <img id="dice2" class="dice" src="../image/dice/dice1.JPG">
+                <input type="button" class ="diceButton" value="Throw Dice!" onclick="throwDice()">
+                <input type="button" value="test" onclick="test1()">
             </div>
-            <div class="playerCards">This will have a div for every plaer <br/> showing their cards</div>
+            <div class="playerCards"> 
+                <!-- inf cards-->
+            </div>
             <div class="chatCont">
                 <textarea name="chatBox"  id="chatBox" readonly></textarea>
                 
@@ -158,6 +209,8 @@
         
     </div>
     <div id="footer"></div>
+
+    
    
 </body>
 </html>

@@ -1,216 +1,385 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <link rel="stylesheet" href="../css/board.css">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+		<link rel="stylesheet" href="../css/board.css" />
 
-  <script src="../../javascript/lib/jquery.js"></script>
-  <script src="../../javascript/lib/jquery-ui.js"></script>
-  <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"> 
+		<script src="../../javascript/lib/jquery.js"></script>
+		<script src="../../javascript/lib/jquery-ui.js"></script>
+		<link
+			rel="stylesheet"
+			href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"
+		/>
 
+		<script
+			type="text/javascript"
+			src="../../javascript/signupValidate.js"
+		></script>
 
-  <script type="text/javascript" src="../../javascript/signupValidate.js"></script>
-  
-  <script type="text/javascript" src="../../javascript/diceScript.js"></script>
-  <script type="text/javascript" src="../../javascript/playerScripts.js"></script>
+		<script
+			type="text/javascript"
+			src="../../javascript/diceScript.js"
+		></script>
+		<script
+			type="text/javascript"
+			src="../../javascript/playerScripts.js"
+		></script>
 
-  <script type="text/javascript" src="../../javascript/cardScript.js"></script>
-  <script type="text/javascript" src="../../javascript/propertiesScript.js"></script>
-  <script src="../socket.io/socket.io.js"></script>
-<script>    
-    var room = "{{room}}";
-    var myName = "{{myName}}";
-    var myTurn = "{{myTurn}}";
+		<script
+			type="text/javascript"
+			src="../../javascript/cardScript.js"
+		></script>
+		<script
+			type="text/javascript"
+			src="../../javascript/propertiesScript.js"
+		></script>
+		<script src="../socket.io/socket.io.js"></script>
+		<script>
+			var room = "{{room}}";
+			var myName = "{{myName}}";
+			var myTurn = "{{myTurn}}";
 
-    var socket=io.connect();
-    socket.on('connect', ()=> {
-        let obj = {
-            room: room,
-            name: myName
-        }
-    
+			var socket = io.connect();
+			socket.on("connect", () => {
+				let obj = {
+					room: room,
+					name: myName
+				};
 
-        socket.emit('room', obj); //emit what room we are in
+				socket.emit("room", obj); //emit what room we are in
 
-        
+				socket.on("chat_msg", msg => {
+					appendToConsole(msg);
+				});
 
-        socket.on('chat_msg', (msg)=> {
-            appendToConsole(msg)
-        });
+				socket.on("moneyUpdate", dat => {
+					console.log(dat);
+					dat.forEach(ele => {
+						var p = getPlayerByID(ele.pID);
+						p.updateMoney = ele.pMoney;
+					});
 
-        socket.on("start_game", (msg)=>{
-            generatePlayers(msg);
-            appendToConsole("Starting a new game with : " + msg)
-            let name = getPlayerNameByID(whosTurnItIs)
-            appendToConsole("System: It is " + name + "'s turn!")
-        });
+					playerList.forEach(element => {
+						console.log(element.playerName + ": " + element.getMoney);
+						var props = element.playerProps;
+						props.forEach(ele => {
+							console.log(ele);
+						});
+					});
+				});
 
-        socket.on('dice_roll', (msg)=> {
-            let name = getPlayerNameByID(msg.p)
-            let totRoll = msg.roll1 + msg.roll2
-            appendToConsole('System: ' + name+ " threw a "+ totRoll + "!")
-            document.getElementById("dice1").src=imgs[msg.roll1-1].src;
-            document.getElementById("dice2").src=imgs[msg.roll2-1].src;
-        });
+				socket.on("start_game", msg => {
+					generatePlayers(msg);
+					appendToConsole("Starting a new game with : " + msg);
+					let name = getPlayerNameByID(whosTurnItIs);
+					appendToConsole("System: It is " + name + "'s turn!");
+				});
 
-        socket.on("move_player", (data) =>{
-            movePlayer(data.playerToMove, data.roll);
-        });
+				socket.on("dice_roll", msg => {
+					let name = getPlayerNameByID(msg.p);
+					let totRoll = msg.roll1 + msg.roll2;
+					appendToConsole("System: " + name + " threw a " + totRoll + "!");
+					document.getElementById("dice1").src = imgs[msg.roll1 - 1].src;
+					document.getElementById("dice2").src = imgs[msg.roll2 - 1].src;
+				});
 
-        socket.on("player_tile_buy", (data)=>{
-            //appendToConsole("System " + data.playerName + " landed on " + data.type)
-           // ConfirmBuyProp("Would you like to buy " + data.name + "?", data.name);
-           if(data.playerName == myName ){
-                var buyProp = confirm("Would you like to buy " + data.name);
-                if(buyProp){
-                    buyThisProp(data.name, myTurn, room)
-                    sendSystemMsg(myName + " has decided to buy " + data.name +"!")
-                }else{
-                    sendSystemMsg(myName + " has declined to buy " + data.name +"!")
-                }
-            }
-        })
+				socket.on("move_player", data => {
+					movePlayer(data.playerToMove, data.roll);
+				});
 
-       
+				socket.on("player_tile_buy", data => {
+					console.log("asking if player wants to buy");
+					//appendToConsole("System " + data.playerName + " landed on " + data.type)
+					// ConfirmBuyProp("Would you like to buy " + data.name + "?", data.name);
+					console.log(data.playerName + ": " + myName);
+					if (data.playerName == myName) {
+						var buyProp = confirm("Would you like to buy " + data.name);
+						if (buyProp) {
+							buyThisProp(data.name, myTurn, room);
+							sendSystemMsg(myName + " has decided to buy " + data.name + "!");
+						} else {
+							sendSystemMsg(myName + " has declined to buy " + data.name + "!");
+						}
+					}
+				});
 
-        socket.on("next_turn", (data)=>{
-            whosTurnItIs = data.playerTurn;
-            let name = getPlayerNameByID(whosTurnItIs)
-            appendToConsole("System: It is " + name + "'s turn!")
-            var gTurn = data.turnNum;
-        });
+				socket.on("next_turn", data => {
+					whosTurnItIs = data.playerTurn;
+					let name = getPlayerNameByID(whosTurnItIs);
+					appendToConsole("System: It is " + name + "'s turn!");
+					var gTurn = data.turnNum;
+				});
 
-        socket.on("this_player_can_throw", (i) =>{
-            if(myTurn == i){
-                $('diceButton').prop('disabled', false);
-            }else{
-                $('diceButton').prop('disabled', true);
-            }
-        })
-    
+				socket.on("propUpdate", data => {
+					var player = getPlayerByID(data.playerToUpdate);
+					var props = player.playerProps;
+					props.push(data.propToAdd);
+					player.playerProps = props;
+				});
 
-});
-function sendMsg(){
-    socket.emit('chat_msg',myName + ": " +  $('#usermsg').val());
-    appendToConsole(myName + ": " +  $('#usermsg').val())
-    $('#usermsg').val('')
-}
+				socket.on("this_player_can_throw", i => {
+					if (myTurn == i) {
+						$("diceButton").prop("disabled", false);
+					} else {
+						$("diceButton").prop("disabled", true);
+					}
+				});
+			});
+			function sendMsg() {
+				socket.emit("chat_msg", myName + ": " + $("#usermsg").val());
+				appendToConsole(myName + ": " + $("#usermsg").val());
+				$("#usermsg").val("");
+			}
 
-function sendSystemMsg(msg){
-    socket.emit('chat_msg',"System: " + msg);
-    appendToConsole("System: " + msg)
-}
+			function sendSystemMsg(msg) {
+				socket.emit("chat_msg", "System: " + msg);
+				appendToConsole("System: " + msg);
+			}
 
-function appendToConsole(msg){
-    $("#chatBox").append(msg + "\n");
-}
+			function appendToConsole(msg) {
+				$("#chatBox").append(msg + "\n");
+			}
 
-function test1(){
-    $("#dialog-Buy-Prop").dialog ("open");
-}
+			function test1() {
+				$("#dialog-Buy-Prop").dialog("open");
+			}
+		</script>
 
-</script>
+		<script>
+			$(document).ready(function() {
+				$("#header").load("../html/headAndFoot/header.html");
+				$("#footer").load("../html/headAndFoot/footer.html");
+			});
+		</script>
+	</head>
+	<body onload="preloadDiceImages()">
+		<div id="header"></div>
+		<div class="cont">
+			<div class="leftCont">
+				<div class="board-cont">
+					<div class="board">
+						<div class="topLeft"><div class="place20"></div></div>
+						<div class="topOne">
+							1
+							<div class="place21"></div>
+							<div class="barRed"></div>
+						</div>
+						<div class="topTwo">
+							2
+							<div class="place22"></div>
+						</div>
+						<div class="topThree">
+							3
+							<div class="place23"></div>
+							<div class="barRed"></div>
+						</div>
+						<div class="topFour">
+							4
+							<div class="place24"></div>
+							<div class="barRed"></div>
+						</div>
+						<div class="topFive">
+							5
+							<div class="place25"></div>
+						</div>
+						<div class="topSix">
+							6
+							<div class="place26"></div>
+							<div class="barYel"></div>
+						</div>
+						<div class="topSeven">
+							7
+							<div class="place27"></div>
+							<div class="barYel"></div>
+						</div>
+						<div class="topEight">
+							8
+							<div class="place28"></div>
+						</div>
+						<div class="topNine">
+							9
+							<div class="place29"></div>
+							<div class="barYel"></div>
+						</div>
+						<div class="topRight"><div class="place30"></div></div>
 
-<script> 
-    $( document ).ready(function() {
-        $("#header").load("../html/headAndFoot/header.html"); 
-        $("#footer").load("../html/headAndFoot/footer.html"); 
-    });
-</script> 
+						<div class="midLeftOne">
+							1
+							<div class="place19"></div>
+							<div class="barOrg"></div>
+						</div>
+						<div class="midLeftTwo">
+							2
+							<div class="place18"></div>
+							<div class="barOrg"></div>
+						</div>
+						<div class="midLeftThree">
+							3
+							<div class="place17"></div>
+						</div>
+						<div class="midLeftFour">
+							4
+							<div class="place16"></div>
+							<div class="barOrg"></div>
+						</div>
+						<div class="midLeftFive">
+							5
+							<div class="place15"></div>
+						</div>
+						<div class="midLeftSix">
+							6
+							<div class="place14"></div>
+							<div class="barPur"></div>
+						</div>
+						<div class="midLeftSeven">
+							7
+							<div class="place13"></div>
+							<div class="barPur"></div>
+						</div>
+						<div class="midLeftEight">
+							8
+							<div class="place12"></div>
+						</div>
+						<div class="midLeftNine">
+							9
+							<div class="place11"></div>
+							<div class="barPur"></div>
+						</div>
 
- 
-</head>
-<body onload="preloadDiceImages()">
-    <div id="header"></div>
-    <div class="cont">
-        <div class="leftCont">
-                <div class = "board-cont">
-                    <div class="board">
-                        <div class="topLeft"><div class="place20"></div></div>
-                        <div class="topOne">1 <div class="place21"></div><div class="barRed"></div></div>
-                        <div class="topTwo">2 <div class="place22"></div> </div>                          
-                        <div class="topThree">3 <div class="place23"></div><div class="barRed"></div></div>
-                        <div class="topFour">4 <div class="place24"></div><div class="barRed"></div></div>
-                        <div class="topFive">5 <div class="place25"></div></div>
-                        <div class="topSix">6 <div class="place26"></div><div class="barYel"></div></div>
-                        <div class="topSeven">7 <div class="place27"></div><div class="barYel"></div></div>
-                        <div class="topEight">8 <div class="place28"></div></div>
-                        <div class="topNine">9 <div class="place29"></div><div class="barYel"></div></div>
-                        <div class="topRight"><div class="place30"></div></div>
-                            
-                        <div class="midLeftOne">1 <div class="place19"></div><div class="barOrg"></div></div>                            
-                        <div class="midLeftTwo">2 <div class="place18"></div><div class="barOrg"></div></div>
-                        <div class="midLeftThree">3 <div class="place17"></div></div>
-                        <div class="midLeftFour">4 <div class="place16"></div><div class="barOrg"></div></div>
-                        <div class="midLeftFive">5 <div class="place15"></div></div>
-                        <div class="midLeftSix">6 <div class="place14"></div><div class="barPur"></div></div>
-                        <div class="midLeftSeven">7 <div class="place13"></div><div class="barPur"></div></div>
-                        <div class="midLeftEight">8 <div class="place12"></div></div>
-                        <div class="midLeftNine">9 <div class="place11"></div><div class="barPur"></div></div>
-                       
-                        <div class="btmLeft"> <div class="place10"> <div class="jail"></div></div></div>
-                        <div class="btmOne">1 <div class="place9"></div><div class="barTur"></div></div>
-                        <div class="btmTwo">2 <div class="place8"></div><div class="barTur"></div></div>
-                        <div class="btmThree">3 <div class="place7"></div></div>
-                        <div class="btmFour">4 <div class="place6"></div><div class="barTur"></div></div>
-                        <div class="btmFive">5 <div class="place5"></div></div>
-                        <div class="btmSix">6 <div class="place4"></div></div>
-                        <div class="btmSeven">7 <div class="place3"></div><div class="barBrw"></div></div>
-                        <div class="btmEight">8 <div class="place2"></div></div>
-                        <div class="btmNine">9 <div class="place1"></div><div class="barBrw"></div></div>
-                        <div class="btmRight"><div class="place0" ></div></div>
-                     
-                        <div class="midRightOne">1 <div class="place31"></div><div class="barGre"></div></div>                            
-                        <div class="midRightTwo">2 <div class="place32"></div><div class="barGre"></div></div>
-                        <div class="midRightThree">3 <div class="place33"></div></div>
-                        <div class="midRightFour">4 <div class="place34"></div><div class="barGre"></div></div>
-                        <div class="midRightFive">5 <div class="place35"></div></div>
-                        <div class="midRightSix">6 <div class="place36"></div></div>
-                        <div class="midRightSeven">7 <div class="place37"></div><div class="barBlu"></div></div>
-                        <div class="midRightEight">8 <div class="place38"></div></div>
-                        <div class="midRightNine">9 <div class="place39"></div><div class="barBlu"></div></div>
-                            
-                        <div class="center">
-                            <div class="community-chest-deck">
-                                <h2 class="deck-name">Community Chest</h2>
-                                <div class="deckCmm"></div>
-                            </div>
-            
-                            <h1 class="title">MONOPOLY</h1>
-                                       
-                            <div class="chance-deck">
-                                <h2 class="deck-name">Chance</h2>
-                                <div class="deckCha"></div>
-                            </div>
-                         </div>
-                    </div>
-                </div>
-        </div>
-        <div class="rightCont">
-            <div class="diceCont" id="diceCont">
-                <img id="dice1" class="dice" src="../image/dice/dice1.JPG">
-                <img id="dice2" class="dice" src="../image/dice/dice1.JPG">
-                <input type="button" class ="diceButton" value="Throw Dice!" onclick="throwDice()">
-                <input type="button" value="test" onclick="test1()">
-            </div>
-            <div class="playerCards"> 
-                <!-- inf cards-->
-            </div>
-            <div class="chatCont">
-                <textarea name="chatBox"  id="chatBox" readonly></textarea>
-                
-                <input name="usermsg" type="text" id="usermsg" size="63">
-                <input type="button" class="chatButton" value="Send!" onclick="sendMsg()"> 
-                 
-            </div>
-        </div>
-        
-    </div>
-    <div id="footer"></div>
+						<div class="btmLeft">
+							<div class="place10"><div class="jail"></div></div>
+						</div>
+						<div class="btmOne">
+							1
+							<div class="place9"></div>
+							<div class="barTur"></div>
+						</div>
+						<div class="btmTwo">
+							2
+							<div class="place8"></div>
+							<div class="barTur"></div>
+						</div>
+						<div class="btmThree">
+							3
+							<div class="place7"></div>
+						</div>
+						<div class="btmFour">
+							4
+							<div class="place6"></div>
+							<div class="barTur"></div>
+						</div>
+						<div class="btmFive">
+							5
+							<div class="place5"></div>
+						</div>
+						<div class="btmSix">
+							6
+							<div class="place4"></div>
+						</div>
+						<div class="btmSeven">
+							7
+							<div class="place3"></div>
+							<div class="barBrw"></div>
+						</div>
+						<div class="btmEight">
+							8
+							<div class="place2"></div>
+						</div>
+						<div class="btmNine">
+							9
+							<div class="place1"></div>
+							<div class="barBrw"></div>
+						</div>
+						<div class="btmRight"><div class="place0"></div></div>
 
-    
-   
-</body>
+						<div class="midRightOne">
+							1
+							<div class="place31"></div>
+							<div class="barGre"></div>
+						</div>
+						<div class="midRightTwo">
+							2
+							<div class="place32"></div>
+							<div class="barGre"></div>
+						</div>
+						<div class="midRightThree">
+							3
+							<div class="place33"></div>
+						</div>
+						<div class="midRightFour">
+							4
+							<div class="place34"></div>
+							<div class="barGre"></div>
+						</div>
+						<div class="midRightFive">
+							5
+							<div class="place35"></div>
+						</div>
+						<div class="midRightSix">
+							6
+							<div class="place36"></div>
+						</div>
+						<div class="midRightSeven">
+							7
+							<div class="place37"></div>
+							<div class="barBlu"></div>
+						</div>
+						<div class="midRightEight">
+							8
+							<div class="place38"></div>
+						</div>
+						<div class="midRightNine">
+							9
+							<div class="place39"></div>
+							<div class="barBlu"></div>
+						</div>
+
+						<div class="center">
+							<div class="community-chest-deck">
+								<h2 class="deck-name">Community Chest</h2>
+								<div class="deckCmm"></div>
+							</div>
+
+							<h1 class="title">MONOPOLY</h1>
+
+							<div class="chance-deck">
+								<h2 class="deck-name">Chance</h2>
+								<div class="deckCha"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="rightCont">
+				<div class="diceCont" id="diceCont">
+					<img id="dice1" class="dice" src="../image/dice/dice1.JPG" />
+					<img id="dice2" class="dice" src="../image/dice/dice1.JPG" />
+					<input
+						type="button"
+						class="diceButton"
+						value="Throw Dice!"
+						onclick="throwDice()"
+					/>
+					<input type="button" value="test" onclick="test1()" />
+				</div>
+				<div class="playerCards">
+					<!-- inf cards-->
+				</div>
+				<div class="chatCont">
+					<textarea name="chatBox" id="chatBox" readonly></textarea>
+
+					<input name="usermsg" type="text" id="usermsg" size="63" />
+					<input
+						type="button"
+						class="chatButton"
+						value="Send!"
+						onclick="sendMsg()"
+					/>
+				</div>
+			</div>
+		</div>
+		<div id="footer"></div>
+	</body>
 </html>

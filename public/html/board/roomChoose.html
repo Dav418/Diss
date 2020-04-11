@@ -4,11 +4,7 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
-		<title>Document</title>
-		<script
-			type="text/javascript"
-			src="../../javascript/roomChooseComponents/roomChooseFunctions.js"
-		></script>
+		<title>Choose a room to play!</title>
 
 		<script
 			type="text/javascript"
@@ -16,6 +12,10 @@
 		></script>
 
 		<link rel="stylesheet" href="../css/roomChoose.css" />
+		<script
+			type="text/javascript"
+			src="../../javascript/roomChooseComponents/askForPass.js"
+		></script>
 
 		<script src="../socket.io/socket.io.js"></script>
 		<script>
@@ -27,66 +27,21 @@
 			socket.on("connect", () => {
 				let obj = {
 					room: "roomChoose",
-					name: "undecidedDumDum"
+					name: "undecided"
 				};
 				socket.emit("room", obj);
+
+				socket.emit("getMeMyListOfRooms");
 			});
 
 			socket.on("update_room_data", data => {
-				//roomTableVar.updateList(data);
+				populateTable(data);
 			});
 		</script>
 	</head>
 	<body>
 		<div class="roomTableDiv" id="roomTableDiv">
-			{% if rooms.length == 0%}
-			<p>No public rooms! Why dont you make one?</p>
-			{%else%}
-			<p>Public rooms:</p>
-			<table id="roomTable">
-				<tr>
-					<th>&nbsp;</th>
-					<th>Room Name</th>
-					<th>Player Number</th>
-					<th>State</th>
-				</tr>
-				<tbody id="#roomTabletbodyID">
-					{% for r in rooms %} {% if r.roomName != "generalChat" &&
-					r.playerNumber < 4 && r.roomName != "roomChoose" %}
-					<tr>
-						{%if r.roomPassword != null %}
-						<td>
-							<button onclick="askForPassword('{{r.roomName}}',true)">
-								Join
-							</button>
-						</td>
-						{% else %}
-						<td>
-							<button onclick="askForPassword('{{r.roomName}}',false)">
-								Join
-							</button>
-						</td>
-						{% endif %}
-						<td>"{{r.roomName}}"</td>
-						<td>{{r.playerNumber}}/4</td>
-						{%if r.roomPassword != null %}
-						<td>
-							Private
-						</td>
-						{% else %}
-						<td>
-							Public
-						</td>
-						{% endif %}
-					</tr>
-					{% endif %} {% endfor %}
-				</tbody>
-			</table>
-
-			<p>
-				Alternatively, you can create your own room here and make it private:
-			</p>
-			{%endif%}
+			<table class="roomTableClass" id="roomTableID"></table>
 		</div>
 		<div class="cont">
 			<form
@@ -111,62 +66,8 @@
 			</form>
 		</div>
 		<script
-			src="https://unpkg.com/react@16/umd/react.development.js"
-			crossorigin
+			type="text/javascript"
+			src="../../javascript/roomChooseComponents/roomChooseFunctions.js"
 		></script>
-		<script
-			src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"
-			crossorigin
-		></script>
-
-		<!-- Load our React component. -->
-		<script src="../../javascript/roomChooseComponents/components/chooseRoomTable.js"></script>
 	</body>
 </html>
-<!-- 
-{% if rooms.length == 0%}
-        <p>No public rooms! Why dont you make one?</p>
-        {%else%}
-            <p>Public rooms: </p>
-            <table id="roomTable">
-                <tr>
-                    <th>&nbsp;</th>
-                    <th>Room Name</th>
-                    <th>Player Number</th>
-                    <th>State</th>
-                </tr>
-                <tbody id = "#roomTabletbodyID">
-                {% for r in rooms %}
-                    {% if r.roomName != "generalChat" && r.playerNumber < 4  && r.roomName != "roomChoose" %}
-                        <tr> 
-                            {%if r.roomPassword != null %}
-                            <td>
-                                <button onclick="askForPassword('{{r.roomName}}',true)">Join</button>
-                            </td>  
-                            {% else %}
-                                <td>
-                                    <button onclick="askForPassword('{{r.roomName}}',false)">Join</button>
-                                </td>
-                            {% endif %}
-                             add a onclick function that checks wetehr it needs a password 
-                            and prob make it in a promps#t-->
-<!-- <td> "{{r.roomName}}" </td> 
-                            <td>{{r.playerNumber}}/4</td>
-                            {%if r.roomPassword != null %}
-                            <td>
-                                Private
-                            </td>  
-                            {% else %}
-                                <td>
-                                    Public
-                                </td>
-                            {% endif %}
-
-                        </tr>
-                    {% endif %}
-                {% endfor %}
-            </tbody>
-            </table>
-        
-        <P>Alternatively, you can create your own room here and make it private: </P> -->
-<!-- {%endif%}  -->

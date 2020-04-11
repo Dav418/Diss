@@ -52,11 +52,21 @@ module.exports.listen = function(app) {
 		});
 
 		socket.on("player_buys_a_prop", data => {
-			gameLogic.minusMoney(data.playerID, data.room, data.propName); 
+			var success = gameLogic.minusMoney(data.playerID, data.room, data.propName); 
 			//take the money from said player 
-			gameLogic.updateGameClientProp(data.playerID,data.room, data.propName);
-			//update the user Object with the propertiy that has been brought
+			// if (success){
+				gameLogic.updateGameClientProp(data.playerID,data.room, data.propName);
+				//update the user Object with the propertiy that has been brought
+			// }else{
+			// 	var dataToSend = {playerID : data.playerID, prop:data.propName}
+			// 	io.in(data.room).emit("player_no_money", dataToSend);
+			// }
+			
 		});
+
+		socket.on("getMeMyListOfRooms", ()=>{
+			roomFunctiions.updateClient();
+		})
 
 		socket.on("disconnecting", function() {
 			// will do stuff just before disconnecting. to do stuff after dc do socket.on("disconnect")

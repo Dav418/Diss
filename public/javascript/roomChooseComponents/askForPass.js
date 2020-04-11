@@ -1,8 +1,5 @@
-module.export ={passCheck : (n, p) => {
-	askForPassword(n, p);
-}}
-
 function askForPassword(roomName, isPrivate) {
+	console.log("inside askForPass " + roomName + " " + isPrivate);
 	if (isPrivate) {
 		var passWord = prompt("Password?");
 		var checking = true;

@@ -30,11 +30,21 @@ module.exports = {
 	},
 	minusMoney: (who, whatRoom, what) => {
 		var room = findRoom(whatRoom);
-		updateSingleRoom(what, who, room);
-
 		var player = findPlayerByID(room, who);
-		playerLogic.updateMoney(player, gameTiles.getPriceOfProp(what));
+		var propPrice = gameTiles.getPriceOfProp(what);
+		// if (player.playerMoney > propPrice){
+		// 	return false;
+		// }else{
+		playerLogic.updateMoney(player, propPrice);
+		updateSingleRoom(what, who, room);
 		updateGameClientMoney(room);
+
+		// return true;
+	},
+	bankTax:(roomName,name,cost)=>{
+		var player = findPlayerByName(roomName,name);
+		var temp = player.playerMoney;
+		player.playerMoney = temp + cost;
 	},
 	taxPlayer: (playerToTax, whoOwns, cost, room) => {
 		var playerToTax = findPlayerByName(room, playerToTax);

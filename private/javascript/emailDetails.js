@@ -21,7 +21,7 @@ function sendE(mailOptions){
 module.exports = {
 	eLoginDeetsFirstTime: (name, email)=>{
 		var swig  = require('swig');
-		var tmpl = swig.compileFile("../pages/emailFile/emailFile.html"),
+		var tmpl = swig.compileFile("private/javascript/emailFile/emailFile.html"),
     		renderedHTML = tmpl({
 				userName : name
     		});

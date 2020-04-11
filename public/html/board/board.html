@@ -15,25 +15,16 @@
 
 		<script
 			type="text/javascript"
-			src="../../javascript/signupValidate.js"
+			src="../../javascript/gameComponents/diceScript.js"
+		></script>
+		<script
+			type="text/javascript"
+			src="../../javascript/gameComponents/playerScripts.js"
 		></script>
 
 		<script
 			type="text/javascript"
-			src="../../javascript/diceScript.js"
-		></script>
-		<script
-			type="text/javascript"
-			src="../../javascript/playerScripts.js"
-		></script>
-
-		<script
-			type="text/javascript"
-			src="../../javascript/cardScript.js"
-		></script>
-		<script
-			type="text/javascript"
-			src="../../javascript/propertiesScript.js"
+			src="../../javascript/gameComponents/propertiesScript.js"
 		></script>
 		<script src="../socket.io/socket.io.js"></script>
 		<script>
@@ -59,14 +50,13 @@
 					dat.forEach(ele => {
 						var p = getPlayerByID(ele.pID);
 						p.updateMoney = ele.pMoney;
-					});
-
-					playerList.forEach(element => {
-						console.log(element.playerName + ": " + element.getMoney);
-						var props = element.playerProps;
-						props.forEach(ele => {
-							console.log(ele);
-						});
+						console.log("P name:" + p.playerName);
+						var temp = document.getElementsByClassName(
+							"infoCardName" + p.playerName
+						)[0];
+						console.log(temp);
+						temp.innerHTML = p.playerName + " has currently : $" + p.getMoney;
+						console.log(temp);
 					});
 				});
 
@@ -89,10 +79,30 @@
 					movePlayer(data.playerToMove, data.roll);
 				});
 
+				socket.on("tax_msg", data => {
+					sendSystemMsg(
+						data.playerWhoGotTaxed +
+							" landed on " +
+							data.tile +
+							" and got taxed by " +
+							getPlayerNameByID(data.whoGotMoney) +
+							" $" +
+							data.taxVal +
+							"!"
+					);
+				});
+
+				socket.on("player_no_money", data => {
+					appendToConsole(
+						getPlayerNameByID(data.playerID) +
+							" tried to buy " +
+							data.prop +
+							" but didnt have enouth money!"
+					);
+				});
+
 				socket.on("player_tile_buy", data => {
 					console.log("asking if player wants to buy");
-					//appendToConsole("System " + data.playerName + " landed on " + data.type)
-					// ConfirmBuyProp("Would you like to buy " + data.name + "?", data.name);
 					console.log(data.playerName + ": " + myName);
 					if (data.playerName == myName) {
 						var buyProp = confirm("Would you like to buy " + data.name);
@@ -117,6 +127,11 @@
 					var props = player.playerProps;
 					props.push(data.propToAdd);
 					player.playerProps = props;
+
+					var temp = document.getElementsByClassName(
+						"prop#" + data.propToAdd
+					)[0];
+					temp.innerHTML = player.playerName;
 				});
 
 				socket.on("this_player_can_throw", i => {
@@ -151,6 +166,7 @@
 			$(document).ready(function() {
 				$("#header").load("../html/headAndFoot/header.html");
 				$("#footer").load("../html/headAndFoot/footer.html");
+				generateTable();
 			});
 		</script>
 	</head>
@@ -362,11 +378,12 @@
 						value="Throw Dice!"
 						onclick="throwDice()"
 					/>
-					<input type="button" value="test" onclick="test1()" />
 				</div>
 				<div class="playerCards">
 					<!-- inf cards-->
 				</div>
+
+				<div id="propTab"></div>
 				<div class="chatCont">
 					<textarea name="chatBox" id="chatBox" readonly></textarea>
 

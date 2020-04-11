@@ -1,9 +1,9 @@
 var gameTiles = [
-	{ id: 0, type: "special", name: "Go" },
+	{ id: 0, type: "special", name: "tax", cost: 200 },
 	{ id: 1, type: "prop", name: "brown prop 1", cost: 60, owned: -1 },
 	{ id: 2, type: "chest", name: "community chest" },
 	{ id: 3, type: "prop", name: "brown prop 2", cost: 60, owned: -1 },
-	{ id: 4, type: "special", name: "income tax" },
+	{ id: 4, type: "special", name: "tax", cost: -200 },
 	{ id: 5, type: "prop-station", name: "place holder 3", cost: 200, owned: -1 },
 	{ id: 6, type: "prop", name: "blue 1", cost: 100, owned: -1 },
 	{ id: 7, type: "chest", name: "chance" },
@@ -55,7 +55,7 @@ var gameTiles = [
 	},
 	{ id: 36, type: "chest", name: "chance" },
 	{ id: 37, type: "prop", name: "blue 1", cost: 350, owned: -1 },
-	{ id: 38, type: "special", name: "pay 100" },
+	{ id: 38, type: "special", name: "tax", cost: -200 },
 	{ id: 39, type: "prop", name: "blue 2", cost: 400, owned: -1 }
 ];
 
@@ -65,6 +65,9 @@ function checkPlayerTile(room, place, playerName) {
 	switch (tilePlayerIsOn.type) {
 		case "special":
 			// special
+			if (tilePlayerIsOn.name == "tax") {
+				gameLogic.bankTax(room.roomName, playerName, tilePlayerIsOn.cost);
+			}
 			var socketio = require("../socketFiles/socketFunctions.js");
 			var data = {
 				playerName: playerName,
@@ -74,7 +77,6 @@ function checkPlayerTile(room, place, playerName) {
 			break;
 		case "prop":
 			if (tilePlayerIsOn.owned == -1) {
-				gameLogic.testFun();
 				// no one ownes it, send msg to player asking to buy
 				var socketio = require("../socketFiles/socketFunctions.js");
 				var data = { playerName: playerName, name: tilePlayerIsOn.name };
@@ -86,13 +88,19 @@ function checkPlayerTile(room, place, playerName) {
 				var tax = tilePlayerIsOn.cost;
 				var who = tilePlayerIsOn.owned;
 				gameLogic.taxPlayer(playerName, who, tax, room);
+				var data = {
+					playerWhoGotTaxed: playerName,
+					tile: tilePlayerIsOn.name,
+					whoGotMoney: who,
+					taxVal: tax
+				};
+				var socketio = require("../socketFiles/socketFunctions.js");
+				socketio.sockets.to(room.roomName).emit("tax_msg", data);
 			}
 			break;
 		case "chest":
 			//do chest stuff
-
-			if(tilePlayerIsOn.name == "community chest"){
-				
+			if (tilePlayerIsOn.name == "community chest") {
 			}
 			var socketio = require("../socketFiles/socketFunctions.js");
 			socketio.sockets.to(room.roomName).emit("player_tile", data);

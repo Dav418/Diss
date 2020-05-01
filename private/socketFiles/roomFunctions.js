@@ -1,7 +1,7 @@
 var User = require("../databaseFiles/userCRUD.js");
 var gameLogic = require("../gameLogic/gameLogic.js");
 var roomList = [];
-
+//TODO: remake how private rooms work cos this shit is broken somehow
 function roomObject(room) {
 	this.room = room;
 	this.numberOfPlayers = 0;
@@ -13,53 +13,53 @@ function roomObject(room) {
 		roomName: {
 			get: () => {
 				return this.room;
-			}
+			},
 		},
 		playerNumber: {
 			get: () => {
 				return this.numberOfPlayers;
-			}
+			},
 		},
 		changeNumber: {
-			set: n => {
+			set: (n) => {
 				this.numberOfPlayers += n;
-			}
+			},
 		},
 		addPlayer: {
-			set: p => {
+			set: (p) => {
 				this.playerList.push(p);
-			}
+			},
 		},
 		removePlayer: {
-			set: i => {
+			set: (i) => {
 				this.playerList.splice(i, 1);
-			}
+			},
 		},
 		getPlayer: {
 			get: () => {
 				return this.playerList;
-			}
+			},
 		},
 		changeRoomStatus: {
-			set: i => {
+			set: (i) => {
 				this.isRoomFull = i;
-			}
+			},
 		},
 		checkRoom: {
 			get: () => {
 				return this.isRoomFull;
-			}
+			},
 		},
 		checkPass: {
 			get: () => {
 				return this.roomPassword;
-			}
+			},
 		},
 		assignPass: {
-			set: i => {
+			set: (i) => {
 				this.roomPassword = i;
-			}
-		}
+			},
+		},
 	});
 }
 
@@ -67,12 +67,12 @@ function startGame(room) {
 	var players = room.getPlayer;
 	var playerNamesInGame = [];
 
-	players.forEach(p => {
+	players.forEach((p) => {
 		var name = p.split(",");
 		playerNamesInGame.push(name[0]);
 
 		var cashPrmise = User.getMoney(name[0]);
-		cashPrmise.then(cash => {
+		cashPrmise.then((cash) => {
 			//take money from each player to start the game
 			User.setMoney(name[0], cash.money - 100);
 		});
@@ -84,9 +84,9 @@ module.exports = {
 	getRoomList: () => {
 		return roomList;
 	},
-	assignPlayerTurn: name => {
+	assignPlayerTurn: (name) => {
 		var i = 0;
-		roomList.forEach(element => {
+		roomList.forEach((element) => {
 			if (element.roomName == name) i = element.playerNumber;
 		});
 		return i + 1;
@@ -95,10 +95,11 @@ module.exports = {
 		var i = new roomObject(roomName);
 		i.assignPass = password;
 		roomList.push(i);
+		
 	},
 	checkRoomPassword(roomName, passWrd) {
 		let found = false;
-		roomList.forEach(element => {
+		roomList.forEach((element) => {
 			if (element.checkPass == passWrd && element.roomName == roomName) {
 				found = true;
 			}
@@ -107,10 +108,8 @@ module.exports = {
 	},
 
 	assignRoom: (papers, ID) => {
-		// papers are room than name than (bool) private
 		var found = false;
-
-		roomList.forEach(e => {
+		roomList.forEach((e) => {
 			// e is the "room" object
 			if (e.roomName == papers.room) {
 				found = true;
@@ -128,6 +127,7 @@ module.exports = {
 				e.roomName != "roomChoose"
 			) {
 				// when theres x players game can start
+				console.log("--------SRTING GAME IN " + e.roomName + "---------");
 				startGame(e);
 			}
 		});
@@ -144,14 +144,14 @@ module.exports = {
 	deleteRoom: (r, ID) => {
 		var roomZero;
 		var found = false;
-		roomList.forEach(e => {
+		roomList.forEach((e) => {
 			// iterate over the roomList
 			if (e.roomName == r) {
 				//room name match room supplied
 				e.changeNumber = -1;
 				players = e.getPlayer;
 				var index = 0;
-				players.forEach(element => {
+				players.forEach((element) => {
 					//iterate over players in room "e"
 					var string = element.split(",");
 					if (string[1] == ID) {
@@ -171,9 +171,9 @@ module.exports = {
 		}
 	},
 
-	checkIfExists: i => {
+	checkIfExists: (i) => {
 		let bck = false;
-		roomList.forEach(e => {
+		roomList.forEach((e) => {
 			if (e.roomName == i) {
 				bck = true;
 			}
@@ -183,20 +183,20 @@ module.exports = {
 
 	printAllRooms: () => {
 		console.log("roomList: ");
-		roomList.forEach(element => {
+		roomList.forEach((element) => {
 			console.log(element);
 		});
 	},
 
 	updateClient: () => {
 		localFunClientUpdate();
-	}
+	},
 };
 
 function localFunClientUpdate() {
 	var data = [];
-	roomList.forEach(room => {
-		console.log("Adding: " + room.roomName);
+	roomList.forEach((room) => {
+
 		if (room.roomName != "generalChat" && room.roomName != "roomChoose") {
 			var state;
 			if (room.checkPass == null) {
@@ -207,7 +207,7 @@ function localFunClientUpdate() {
 			var formatedRoom = {
 				roomName: room.roomName,
 				pNumb: room.playerNumber,
-				roomState: state
+				roomState: state,
 			};
 			data.push(formatedRoom);
 		}

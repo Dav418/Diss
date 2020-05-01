@@ -65,19 +65,12 @@ h1 {
 }
 .rightCont {
 	float: left;
-	border: 1px solid black;
 	margin-left: 100px;
 }
 
-.playerCards {
-	margin-top: 10%;
-	margin-bottom: 10%;
-	border: 1px solid red;
-}
 .chatCont {
 	margin-top: 10%;
 	margin-bottom: 10%;
-	border: 1px solid blue;
 	width: 300px;
 	height: 400px;
 }
@@ -85,7 +78,6 @@ h1 {
 .diceCont {
 	margin-top: 10%;
 	margin-bottom: 10%;
-
 	text-align: center;
 }
 
@@ -173,39 +165,6 @@ h1 {
 	background-color: orange;
 }
 
-.barRed {
-	grid-area: barRed;
-	background-color: red;
-}
-.barYel {
-	grid-area: barYel;
-	background-color: yellow;
-}
-.barGre {
-	grid-area: barGre;
-	background-color: green;
-}
-.barOrg {
-	grid-area: barOrg;
-	background-color: orange;
-}
-.barPur {
-	grid-area: barPur;
-	background-color: purple;
-}
-.barBlu {
-	grid-area: barBlu;
-	background-color: blue;
-}
-.barBrw {
-	grid-area: barBrw;
-	background-color: brown;
-}
-.barTur {
-	grid-area: barTur;
-	background-color: Turquoise;
-}
-
 .topLeft {
 	grid-area: topLeft;
 	border: 1px solid rgba(0, 0, 0, 0.8);
@@ -223,7 +182,10 @@ h1 {
 .topTwo {
 	grid-area: topTwo;
 	border: 1px solid rgba(0, 0, 0, 0.959);
-	background-color: rgb(204, 227, 199);
+	background-image: url("../image/chance.jpg");
+	background-size: cover;
+	background-position: center center;
+	background-repeat: no-repeat;
 }
 .topThree {
 	grid-area: topThree;
@@ -283,7 +245,7 @@ h1 {
 .midLeftThree {
 	grid-area: midLeftThree;
 	border: 1px solid rgba(0, 0, 0, 0.959);
-	background-color: rgb(204, 227, 199);
+	background-image: url("../image/cc2.png");
 }
 .midLeftFour {
 	grid-area: midLeftFour;
@@ -329,7 +291,7 @@ h1 {
 .midRightThree {
 	grid-area: midRightThree;
 	border: 1px solid rgba(0, 0, 0, 0.959);
-	background-color: rgb(204, 227, 199);
+	background-image: url("../image/cc3.png");
 }
 .midRightFour {
 	grid-area: midRightFour;
@@ -344,7 +306,10 @@ h1 {
 .midRightSix {
 	grid-area: midRightSix;
 	border: 1px solid rgba(0, 0, 0, 0.959);
-	background-color: rgb(204, 227, 199);
+	background-image: url("../image/chance.jpg");
+	background-size: cover;
+	background-position: center center;
+	background-repeat: no-repeat;
 }
 .midRightSeven {
 	grid-area: midRightSeven;
@@ -383,7 +348,10 @@ h1 {
 .btmThree {
 	grid-area: btmThree;
 	border: 1px solid rgba(0, 0, 0, 0.959);
-	background-color: rgb(204, 227, 199);
+	background-image: url("../image/chance.jpg");
+	background-size: cover;
+	background-position: center center;
+	background-repeat: no-repeat;
 }
 .btmFour {
 	grid-area: btmFour;
@@ -408,7 +376,7 @@ h1 {
 .btmEight {
 	grid-area: btmEight;
 	border: 1px solid rgba(0, 0, 0, 0.959);
-	background-color: rgb(204, 227, 199);
+	background-image: url("..//image/cc.png");
 }
 .btmNine {
 	grid-area: btmNine;
@@ -422,4 +390,99 @@ h1 {
 	background-size: cover;
 	background-position: center center;
 	background-repeat: no-repeat;
+}
+
+/* Popup box BEGIN */
+.popupBox {
+	background: rgba(0, 0, 0, 0.4);
+	cursor: pointer;
+	display: none;
+	height: 100%;
+	position: fixed;
+	text-align: center;
+	top: 0;
+	width: 100%;
+	z-index: 10000;
+}
+.popupBox .helper {
+	display: inline-block;
+	height: 100%;
+	vertical-align: middle;
+}
+.popupBox > div {
+	background-color: #fff;
+	box-shadow: 10px 10px 60px #555;
+	display: inline-block;
+	height: auto;
+	max-width: 400px;
+	min-height: 600px;
+	vertical-align: middle;
+	width: 60%;
+	position: relative;
+	border-radius: 8px;
+	padding: 15px 5%;
+}
+.popupCloseButton {
+	background-color: #fff;
+	border: 3px solid #999;
+	border-radius: 50px;
+	cursor: pointer;
+	display: inline-block;
+	font-family: arial;
+	font-weight: bold;
+	position: absolute;
+	top: -20px;
+	right: -20px;
+	font-size: 25px;
+	line-height: 30px;
+	width: 30px;
+	height: 30px;
+	text-align: center;
+}
+.popupCloseButton:hover {
+	background-color: #ccc;
+}
+
+/* Popup box END */
+
+.houseImg,
+.hotelImg {
+	width: 10px;
+	height: 10px;
+	float: left;
+}
+#errMsg {
+	font-weight: bold;
+}
+.mainBtn {
+	box-shadow: inset -1px -1px 6px 1px #cf866c;
+	background: linear-gradient(to bottom, #d0451b 5%, #bc3315 100%);
+	background-color: #d0451b;
+	border-radius: 42px;
+	border: 2px solid #942911;
+	display: inline-block;
+	cursor: pointer;
+	color: #ffffff;
+	font-family: Arial;
+	font-size: 13px;
+	padding: 8px 16px;
+	text-decoration: none;
+	text-shadow: 0px 1px 0px #854629;
+}
+.mainBtn:hover {
+	background: linear-gradient(to bottom, #bc3315 5%, #d0451b 100%);
+	background-color: #bc3315;
+}
+.mainBtn:active {
+	position: relative;
+	top: 1px;
+}
+.mainBtn[disabled] {
+	border: 1px solid #999999;
+	background-color: #cccccc;
+	color: #666666;
+}
+
+#tradeInit {
+	float: left;
 }

@@ -57,15 +57,15 @@ function deck(name) {
 function generateDecks() {
 	var decks = [];
 	for (var i = 0; i < 2; i++) {
-		console.log("i: " + i);
+		
 		if (i == 0) {
 			var chance = new deck("Chance");
-			console.log("Chance deck created!");
+		
 			generateChanceCards(chance);
 			decks.push(chance);
 		} else {
 			var cc = new deck("Community Chest");
-			console.log("Cumminity Chest deck created!");
+		
 			generateCommunityCards(cc);
 			testCardGen(cc);
 			decks.push(cc);

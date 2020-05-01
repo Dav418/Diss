@@ -8,7 +8,7 @@ var path = require("path");
 var rootHTML = path.join(__dirname, "../public/html/users");
 
 /* GET users listing. */
-router.get("/", function(req, res, next) {
+router.get("/", function (req, res, next) {
 	var sess = req.session;
 	if (sess.userObj) {
 		var tmpl = swig.compileFile(rootHTML + "/dashboard.html"),
@@ -16,66 +16,61 @@ router.get("/", function(req, res, next) {
 				userName: sess.userObj.userName,
 				cash: sess.userObj.cash,
 				bdate: sess.userObj.bDay,
-				exp: sess.userObj.exp
+				exp: sess.userObj.exp,
 			});
 
 		req.session.save();
 		res.end(renderedHTML);
 	} else {
 		res.sendFile("403.html", {
-			root: path.join(__dirname, "../public/html/error")
+			root: path.join(__dirname, "../public/html/error"),
 		});
 	}
 });
 
-router.post("/sign_up", function(req, res, next) {
+router.post("/sign_up", function (req, res, next) {
 	var un = req.body.name;
 	var e = req.body.email;
 	var pw = req.body.password;
-	console.log("in /sign_up");
 
-	User.createUser(un, e, pw, err => {
-		console.log("inside usercreate");
+	User.createUser(un, e, pw, (err) => {
 		var tmpl = swig.compileFile(rootHTML + "/signup.html");
-		console.log("err: " + err);
 		if (err != null) {
 			renderedHTML = tmpl({
 				error: true,
 				errMsg: "Username or email",
 				userNam: un,
-				em: e
+				em: e,
 			});
 			res.end(renderedHTML);
 		} else {
-			console.log("account creation succesful!");
 			res.sendFile("userCreated.html", { root: rootHTML });
 		}
 	});
 });
 
-router.get("/signup", function(req, res, next) {
+router.get("/signup", function (req, res, next) {
 	var tmpl = swig.compileFile(rootHTML + "/signup.html");
 	renderedHTML = tmpl({
 		error: false,
 		errMsg: "",
 		userNam: "",
-		em: ""
+		em: "",
 	});
 	res.end(renderedHTML);
 });
 
-router.post("/log_in", function(req, res, next) {
+router.post("/log_in", function (req, res, next) {
 	var un = req.body.un;
 	var pw = req.body.pw;
 
-	User.readUser(un, pw, function(err, u) {
+	User.readUser(un, pw, function (err, u) {
 		if (err || !u) {
-			console.log("inside err");
 			var tmpl = swig.compileFile(rootHTML + "/login.html"),
 				renderedHTML = tmpl({
 					error: true,
 					errMsg: err,
-					userNam: un
+					userNam: un,
 				});
 			//do tha same but for success
 
@@ -88,7 +83,7 @@ router.post("/log_in", function(req, res, next) {
 				userName: u.userName,
 				cash: u.money,
 				bDay: date.toDateString(),
-				exp: u.exp
+				exp: u.exp,
 			};
 			sess.youMayEnter = false;
 
@@ -98,11 +93,26 @@ router.post("/log_in", function(req, res, next) {
 	});
 }); // redirect to dashboard after user has succesfully logged on
 
-router.get("/login", function(req, res, next) {
+router.get("/login", function (req, res, next) {
 	var tmpl = swig.compileFile(rootHTML + "/login.html"),
 		renderedHTML = tmpl({
 			error: false,
-			errMsg: ":)"
+			errMsg: ":)",
+		});
+
+	res.end(renderedHTML);
+});
+router.get("/leaderboard", function (req, res, next) {
+	var i = User.findAllUsers();
+	console.log("isnide");
+	console.log(i);
+	i.forEach((element) => {
+		console.log("loop");
+		console.log(element);
+	});
+	var tmpl = swig.compileFile(rootHTML + "/leaderboard.html"),
+		renderedHTML = tmpl({
+			list: i,
 		});
 
 	res.end(renderedHTML);

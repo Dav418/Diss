@@ -38,3 +38,55 @@ body {
 		transform: rotate(360deg);
 	}
 }
+
+table.roomTableClass {
+	font-family: Georgia, serif;
+	border: 10px solid rgb(178, 213, 183);
+	background-color: rgb(206, 230, 208);
+	width: 100%;
+	text-align: center;
+}
+table.roomTableClass td,
+table.roomTableClass th {
+	border: 1px solid rgb(178, 213, 183);
+	padding: 1px 0px;
+}
+table.roomTableClass tbody td {
+	font-size: 13px;
+}
+table.roomTableClass thead {
+	background: rgb(178, 213, 183);
+	background: -moz-linear-gradient(top, #5baf6b 0%, #3a9e4d 66%, #24943a 100%);
+	background: -webkit-linear-gradient(
+		top,
+		#5baf6b 0%,
+		#3a9e4d 66%,
+		#24943a 100%
+	);
+	background: linear-gradient(to bottom, #5baf6b 0%, #3a9e4d 66%, #24943a 100%);
+	border-bottom: 0px solid #444444;
+}
+table.roomTableClass thead th {
+	font-size: 21px;
+	font-weight: bold;
+	color: #f0f0f0;
+	text-align: center;
+	border-left: 2px solid rgb(178, 213, 183);
+}
+table.roomTableClass thead th:first-child {
+	border-left: none;
+}
+
+table.roomTableClass tfoot td {
+	font-size: 10px;
+}
+table.roomTableClass tfoot .links {
+	text-align: right;
+}
+table.roomTableClass tfoot .links a {
+	display: inline-block;
+	background: #ffffff;
+	color: #24943a;
+	padding: 2px 8px;
+	border-radius: 5px;
+}

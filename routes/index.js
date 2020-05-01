@@ -8,11 +8,7 @@ var swig  = require('swig');
 /* GET home page. */
 router.get('/', function(req, res) {
   
-  console.log("inside index.js ");
   var sess= req.session;
-
-  console.log(sess);
- 
   if(sess.userObj){
     var tmpl = swig.compileFile(routeHTML+"/index.html"),
     renderedHTML = tmpl({
@@ -25,7 +21,7 @@ router.get('/', function(req, res) {
     
     var tmpl = swig.compileFile(routeHTML+"/index.html"),
     renderedHTML = tmpl({
-      userName : "Errrrrrrr",
+      userName : "no name",
       noLogin : true,
     });
     

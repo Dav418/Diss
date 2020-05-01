@@ -1,5 +1,4 @@
 function askForPassword(roomName, isPrivate) {
-	console.log("inside askForPass " + roomName + " " + isPrivate);
 	if (isPrivate) {
 		var passWord = prompt("Password?");
 		var checking = true;
@@ -44,4 +43,17 @@ function askForPassword(roomName, isPrivate) {
 			}
 		});
 	}
+}
+
+function hideShowPasswordFeild(box) {
+	document.getElementById("roomPass").readOnly = !box.checked;
+}
+
+function checkForm(form) {
+	if (form.roomCreate.value == "") {
+		alert("Cant be empty!");
+		form.roomName.focus();
+		return false;
+	}
+	return true;
 }

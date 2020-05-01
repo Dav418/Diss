@@ -3,7 +3,6 @@ class Player {
 		this.id = id;
 		var pos = 0;
 		var money = 1500;
-		var properties = [];
 		this.name = name;
 
 		Object.defineProperties(this, {
@@ -33,14 +32,6 @@ class Player {
 					return this.name;
 				}
 			},
-			playerProperties: {
-				get: () => {
-					return this.properties;
-				},
-				set: i => {
-					this.properties = i;
-				}
-			}
 		});
 	}
 }
@@ -62,24 +53,17 @@ module.exports = {
 		if (newPosCalc > 39) {
 			var rem = parseInt(newPosCalc, 10) - parseInt(39, 10);
 			newPosCalc = parseInt(rem, 10);
+			
 		}
 
 		playerToUpdate.playerPos = newPosCalc;
 
 		return newPosCalc;
 	},
-	swapPlayers: (p1, p2) => {},
 	updateMoney: (playerToUpdate, howMuchMoney) => {
 		var currentMoney = playerToUpdate.playerMoney;
 		var updateMoney = parseInt(currentMoney, 10) - parseInt(howMuchMoney, 10);
 		playerToUpdate.playerMoney = updateMoney;
 	},
-	addProp: (player, prop) => {
-		var props = player.playerProperties;
-		if (props === undefined) {
-			props = [];
-		}
-		props.push(prop);
-		player.playerProperties = props;
-	}
+	
 };

@@ -12,7 +12,6 @@ body{
 .chatCont{
 	margin-top: 10%;
 	margin-bottom:10%; 
-	border: 1px solid blue;
 	width:300px;
     height:400px;
 }

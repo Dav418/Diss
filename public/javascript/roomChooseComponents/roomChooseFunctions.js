@@ -1,62 +1,3 @@
-function hideShowPasswordFeild(box) {
-	document.getElementById("roomPass").readOnly = !box.checked;
-}
-
-function checkForm(form) {
-	if (form.roomCreate.value == "") {
-		alert("Cant be empty!");
-		form.roomName.focus();
-		return false;
-	}
-	return true;
-}
-
-function askForPassword(roomName, isPrivate) {
-	if (isPrivate) {
-		var passWord = prompt("Password?");
-		var checking = true;
-		var cancel = false;
-	} else {
-		var checking = false;
-		var cancel = false;
-	}
-
-	while (checking) {
-		if (passWord == "") {
-			alert("Password cant be empty!");
-			var passWord = prompt("Password?");
-		} else if (passWord) {
-			checking = false;
-		} else {
-			cancel = true;
-		}
-	}
-	if (!cancel) {
-		var formData = new FormData();
-		formData.append("roomName", roomName);
-		formData.append("isPrivate", isPrivate);
-		if (isPrivate) {
-			formData.append("passWord", passWord);
-		}
-
-		fetch("/board/validate", {
-			method: "POST",
-			enctype: "multipart/form-data",
-			body: formData
-		}).then(responce => {
-			var stat = responce.status;
-			if (stat == 200) {
-				//redirect
-				window.location.replace("board/valid?id=" + roomName);
-			} else if (stat == 418) {
-				//no room
-				alert("Room doesnt exist anymore. This is most likely a server error");
-			} else if (stat == 419) {
-				alert("Wrong pass");
-			}
-		});
-	}
-}
 function populateTable(roomList) {
 	$(".roomTableDiv").empty();
 
@@ -65,7 +6,6 @@ function populateTable(roomList) {
 		$("#roomTableDiv").append(txt);
 	} else {
 		var number_of_rows = roomList.length;
-		var number_of_cols = 4;
 		var table_body = $("<table/>");
 		table_body.addClass("roomTableClass");
 
@@ -87,28 +27,28 @@ function populateTable(roomList) {
 		for (var i = 0; i < number_of_rows; i++) {
 			var row = $("<tr>");
 			table_body.append(row);
-			for (var j = 0; j < number_of_cols; j++) {
-				var data = $("<td>");
-				if (j == 0) {
-					data.append(
-						createJoinButton(roomList[i].roomName, findRoomState(i, roomList))
-					);
-					row.append(data);
-				} else if (j == 1) {
-					data.append(roomList[i].roomName);
-					row.append(data);
-				} else if (j == 2) {
-					data.append(roomList[i].pNumb);
-					row.append(data);
-				} else {
-					if (findRoomState(i, roomList)) {
-						data.append("Private");
-					} else {
-						data.append("Public");
-					}
-					row.append(data);
-				}
-			}
+
+			var data = $("<td>");
+			data.append(
+				createJoinButton(
+					roomList[i].roomName,
+					findRoomState(roomList[i].roomState)
+				)
+			);
+			row.append(data);
+
+			var data2 = $("<td>");
+			data2.append(roomList[i].roomName);
+			row.append(data2);
+
+			var data3 = $("<td>");
+			data3.append(roomList[i].pNumb);
+			row.append(data3);
+
+			var data4 = $("<td>");
+			data4.append(roomList[i].roomState);
+
+			row.append(data4);
 		}
 
 		$("#roomTableDiv").append(table_body);
@@ -117,20 +57,20 @@ function populateTable(roomList) {
 	}
 }
 
-function findRoomState(id, list) {
-	list.forEach(element => {
-		if (element.id == id) {
-			return element.roomState == "Private";
-		}
-	});
+function findRoomState(i) {
+	if (i == "Private") {
+		return true;
+	} else {
+		return false;
+	}
 }
 
 function createJoinButton(room, state) {
 	return $("<button/>", {
 		text: "Join",
 		id: "btn_Join",
-		click: function() {
+		click: function () {
 			askForPassword(room, state);
-		}
+		},
 	});
 }

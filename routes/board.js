@@ -15,8 +15,6 @@ router.get("/", upload.none(), function(req, res) {
 		var tmpl = swig.compileFile(rootHTML + "/roomChoose.html"),
 			renderedHTML = tmpl({
 				err: false,
-				errMsg: " ",
-				rooms: roomList
 			});
 		res.end(renderedHTML);
 	} else {
@@ -36,8 +34,6 @@ router.post("/createNew", upload.none(), function(req, res) {
 			var tmpl = swig.compileFile(rootHTML + "/roomChoose.html"),
 				renderedHTML = tmpl({
 					err: true,
-					errMsg: "Room already exists",
-					rooms: roomList
 				});
 			res.end(renderedHTML);
 		}
@@ -93,8 +89,7 @@ router.post("/validate", upload.none(), function(req, res) {
 
 router.get("/valid", upload.none(), function(req, res) {
 	var sess = req.session;
-	console.log("youMayEnter: ");
-	console.log(sess.youMayEnter);
+
 	if (sess.userObj && sess.youMayEnter) {
 		var roomName = req.param("id");
 		var tmpl = swig.compileFile(rootHTML + "/board.html"),

@@ -10,7 +10,10 @@
 			type="text/javascript"
 			src="../../javascript/lib/jquery.js"
 		></script>
-
+		<script
+			type="text/javascript"
+			src="../../javascript/roomChooseComponents/roomChooseFunctions.js"
+		></script>
 		<link rel="stylesheet" href="../css/roomChoose.css" />
 		<script
 			type="text/javascript"
@@ -19,7 +22,7 @@
 
 		<script src="../socket.io/socket.io.js"></script>
 		<script>
-			$(document).ready(function() {
+			$(document).ready(function () {
 				document.getElementById("roomPass").readOnly = true;
 			});
 
@@ -27,19 +30,25 @@
 			socket.on("connect", () => {
 				let obj = {
 					room: "roomChoose",
-					name: "undecided"
+					name: "undecided",
 				};
 				socket.emit("room", obj);
 
 				socket.emit("getMeMyListOfRooms");
 			});
 
-			socket.on("update_room_data", data => {
+			socket.on("update_room_data", (data) => {
 				populateTable(data);
 			});
 		</script>
 	</head>
 	<body>
+		{% if err %}
+		<p>
+			Roomname alrady exists! <br />
+			Join it or create a new room!
+		</p>
+		{% endif %}
 		<div class="roomTableDiv" id="roomTableDiv">
 			<table class="roomTableClass" id="roomTableID"></table>
 		</div>
@@ -55,7 +64,8 @@
 					name="private"
 					id="private"
 					onclick="hideShowPasswordFeild(this)"
-				/>Private room? <br />
+				/>
+				Private room? <br />
 				Roomname:
 				<input type="text" name="roomName" id="roomName" />
 				<div class="roomPasswordDiv" id="roomPasswordDiv">
@@ -65,9 +75,5 @@
 				<button type="submit">Create room</button>
 			</form>
 		</div>
-		<script
-			type="text/javascript"
-			src="../../javascript/roomChooseComponents/roomChooseFunctions.js"
-		></script>
 	</body>
 </html>

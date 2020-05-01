@@ -19,12 +19,25 @@
 		></script>
 		<script
 			type="text/javascript"
+			src="../../javascript/gameComponents/miscscripts.js"
+		></script>
+		<script
+			type="text/javascript"
+			src="../../javascript/gameComponents/socketScripts.js"
+		></script>
+		<script
+			type="text/javascript"
 			src="../../javascript/gameComponents/playerScripts.js"
 		></script>
 
 		<script
 			type="text/javascript"
 			src="../../javascript/gameComponents/propertiesScript.js"
+		></script>
+
+		<script
+			type="text/javascript"
+			src="../../javascript/gameComponents/tradeScripts.js"
 		></script>
 		<script src="../socket.io/socket.io.js"></script>
 		<script>
@@ -36,137 +49,120 @@
 			socket.on("connect", () => {
 				let obj = {
 					room: room,
-					name: myName
+					name: myName,
 				};
 
 				socket.emit("room", obj); //emit what room we are in
 
-				socket.on("chat_msg", msg => {
+				socket.on("chat_msg", (msg) => {
 					appendToConsole(msg);
 				});
 
-				socket.on("moneyUpdate", dat => {
-					console.log(dat);
-					dat.forEach(ele => {
-						var p = getPlayerByID(ele.pID);
-						p.updateMoney = ele.pMoney;
-						console.log("P name:" + p.playerName);
-						var temp = document.getElementsByClassName(
-							"infoCardName" + p.playerName
-						)[0];
-						console.log(temp);
-						temp.innerHTML = p.playerName + " has currently : $" + p.getMoney;
-						console.log(temp);
-					});
+				socket.on("moneyUpdate", (dat) => {
+					updateMoneyFromServer(dat);
 				});
 
-				socket.on("start_game", msg => {
-					generatePlayers(msg);
-					appendToConsole("Starting a new game with : " + msg);
-					let name = getPlayerNameByID(whosTurnItIs);
-					appendToConsole("System: It is " + name + "'s turn!");
+				socket.on("start_game", (msg) => {
+					startGameFromServer(msg);
 				});
 
-				socket.on("dice_roll", msg => {
-					let name = getPlayerNameByID(msg.p);
-					let totRoll = msg.roll1 + msg.roll2;
-					appendToConsole("System: " + name + " threw a " + totRoll + "!");
-					document.getElementById("dice1").src = imgs[msg.roll1 - 1].src;
-					document.getElementById("dice2").src = imgs[msg.roll2 - 1].src;
+				socket.on("player_loose", (name) => {
+					playerLost(name);
+				});
+				socket.on("bank_asset", (name) => {
+					var temp = document.getElementsByClassName("prop#" + name)[0];
+					temp.innerHTML = "Bank";
+				});
+				socket.on("game_over", (name) => {
+					playerWin(name);
 				});
 
-				socket.on("move_player", data => {
+				socket.on("dice_roll", (msg) => {
+					diceRollFromServer(msg);
+				});
+
+				socket.on("move_player", (data) => {
 					movePlayer(data.playerToMove, data.roll);
 				});
 
-				socket.on("tax_msg", data => {
-					sendSystemMsg(
-						data.playerWhoGotTaxed +
-							" landed on " +
-							data.tile +
-							" and got taxed by " +
-							getPlayerNameByID(data.whoGotMoney) +
-							" $" +
-							data.taxVal +
-							"!"
-					);
+				socket.on("tax_msg", (data) => {
+					taxPlayerFromServer(data);
 				});
 
-				socket.on("player_no_money", data => {
-					appendToConsole(
-						getPlayerNameByID(data.playerID) +
-							" tried to buy " +
-							data.prop +
-							" but didnt have enouth money!"
-					);
+				socket.on("player_no_money", (data) => {
+					playerNoMoneyMsgFromServer(data);
 				});
 
-				socket.on("player_tile_buy", data => {
-					console.log("asking if player wants to buy");
-					console.log(data.playerName + ": " + myName);
-					if (data.playerName == myName) {
-						var buyProp = confirm("Would you like to buy " + data.name);
-						if (buyProp) {
-							buyThisProp(data.name, myTurn, room);
-							sendSystemMsg(myName + " has decided to buy " + data.name + "!");
+				socket.on("player_tile_buy", (data) => {
+					playerTileBuyConfirm(data);
+				});
+
+				socket.on("next_turn", (data) => {
+					nextTurnFromServer(data);
+				});
+
+				socket.on("propUpdate", (data) => {
+					updatePropTable(data);
+				});
+
+				socket.on("what_props_does_id_own_resp", (data) => {
+					addToTrade(data);
+				});
+				socket.on("someone_got_taxed", (data) => {
+					displayTaxInfo(data);
+				});
+
+				socket.on("player_pass_go", (i) => {
+					if (i == myTurn) {
+						alert("Passed go!");
+					}
+				});
+
+				socket.on("check_money_resp", (data) => {
+					if ((data.id = myTurn)) {
+						if (data.hasMoney) {
+							confirmTrade();
 						} else {
-							sendSystemMsg(myName + " has declined to buy " + data.name + "!");
+							noMoneyTrade();
 						}
 					}
 				});
-
-				socket.on("next_turn", data => {
-					whosTurnItIs = data.playerTurn;
-					let name = getPlayerNameByID(whosTurnItIs);
-					appendToConsole("System: It is " + name + "'s turn!");
-					var gTurn = data.turnNum;
+				socket.on("list_of_user_owned_props", (data) => {
+					addUserOwnedProps(data);
+				});
+				socket.on("confirm_trade_from_server", (data) => {
+					confirmTradeFromServer(data);
+				});
+				socket.on("prop_update_after_trade", (data) => {
+					console.log("Data to update table after a trade: ");
+					console.log(data);
+					updatePropTableTrade(data);
 				});
 
-				socket.on("propUpdate", data => {
-					var player = getPlayerByID(data.playerToUpdate);
-					var props = player.playerProps;
-					props.push(data.propToAdd);
-					player.playerProps = props;
-
-					var temp = document.getElementsByClassName(
-						"prop#" + data.propToAdd
-					)[0];
-					temp.innerHTML = player.playerName;
+				socket.on("err_msg", (data) => {
+					displayErr(data);
 				});
 
-				socket.on("this_player_can_throw", i => {
-					if (myTurn == i) {
-						$("diceButton").prop("disabled", false);
-					} else {
-						$("diceButton").prop("disabled", true);
-					}
+				socket.on("build_house_res", (id) => {
+					buildHousesResponce(id);
 				});
 			});
-			function sendMsg() {
-				socket.emit("chat_msg", myName + ": " + $("#usermsg").val());
-				appendToConsole(myName + ": " + $("#usermsg").val());
-				$("#usermsg").val("");
-			}
-
-			function sendSystemMsg(msg) {
-				socket.emit("chat_msg", "System: " + msg);
-				appendToConsole("System: " + msg);
-			}
-
-			function appendToConsole(msg) {
-				$("#chatBox").append(msg + "\n");
-			}
-
-			function test1() {
-				$("#dialog-Buy-Prop").dialog("open");
-			}
 		</script>
 
 		<script>
-			$(document).ready(function() {
+			$(document).ready(function () {
 				$("#header").load("../html/headAndFoot/header.html");
 				$("#footer").load("../html/headAndFoot/footer.html");
+				$(".popupCloseButton").click(function () {
+					$(".popupBox").hide();
+				});
+				// $(".popupBox").click(function () {
+				// 	$(".popupBox").hide();
+				// });
+				preloadInfoImages();
 				generateTable();
+				changeStateOfButtons(true);
+				startBackgroundAudio();
 			});
 		</script>
 	</head>
@@ -176,180 +172,184 @@
 			<div class="leftCont">
 				<div class="board-cont">
 					<div class="board">
-						<div class="topLeft"><div class="place20"></div></div>
-						<div class="topOne">
-							1
-							<div class="place21"></div>
-							<div class="barRed"></div>
+						<div class="topLeft">
+							<div class="place20"></div>
 						</div>
-						<div class="topTwo">
-							2
+						<div class="topOne" onclick="showCard(21)">
+							<div class="place21"></div>
+							<div id="house21" class="house"></div>
+							<div id="hotel21" class="hotel"></div>
+						</div>
+						<div class="topTwo" onclick="showCard(22)">
 							<div class="place22"></div>
 						</div>
-						<div class="topThree">
-							3
+						<div class="topThree" onclick="showCard(23)">
 							<div class="place23"></div>
-							<div class="barRed"></div>
+							<div id="house23" class="house"></div>
+							<div id="hotel23" class="hotel"></div>
 						</div>
-						<div class="topFour">
-							4
+						<div class="topFour" onclick="showCard(24)">
 							<div class="place24"></div>
-							<div class="barRed"></div>
+							<div id="house24" class="house"></div>
+							<div id="hotel24" class="hotel"></div>
 						</div>
-						<div class="topFive">
+						<div class="topFive" onclick="showCard(25)">
 							5
 							<div class="place25"></div>
 						</div>
-						<div class="topSix">
-							6
+						<div class="topSix" onclick="showCard(26)">
 							<div class="place26"></div>
-							<div class="barYel"></div>
+							<div id="house26" class="house"></div>
+							<div id="hotel26" class="hotel"></div>
 						</div>
-						<div class="topSeven">
-							7
+						<div class="topSeven" onclick="showCard(27)">
 							<div class="place27"></div>
-							<div class="barYel"></div>
+							<div id="house27" class="house"></div>
+							<div id="hotel27" class="hotel"></div>
 						</div>
-						<div class="topEight">
+						<div class="topEight" onclick="showCard(8)">
 							8
 							<div class="place28"></div>
 						</div>
-						<div class="topNine">
-							9
+						<div class="topNine" onclick="showCard(29)">
 							<div class="place29"></div>
-							<div class="barYel"></div>
+							<div id="house29" class="house"></div>
+							<div id="hotel29" class="hotel"></div>
 						</div>
-						<div class="topRight"><div class="place30"></div></div>
+						<div class="topRight" onclick="showCard(30)">
+							<div class="place30"></div>
+						</div>
 
-						<div class="midLeftOne">
-							1
+						<div class="midLeftOne" onclick="showCard(19)">
 							<div class="place19"></div>
-							<div class="barOrg"></div>
+							<div id="house19" class="house"></div>
+							<div id="hotel19" class="hotel"></div>
 						</div>
-						<div class="midLeftTwo">
-							2
+						<div class="midLeftTwo" onclick="showCard(18)">
 							<div class="place18"></div>
-							<div class="barOrg"></div>
+							<div id="house18" class="house"></div>
+							<div id="hotel18" class="hotel"></div>
 						</div>
-						<div class="midLeftThree">
+						<div class="midLeftThree" onclick="showCard(17)">
 							3
 							<div class="place17"></div>
 						</div>
-						<div class="midLeftFour">
-							4
+						<div class="midLeftFour" onclick="showCard(16)">
 							<div class="place16"></div>
-							<div class="barOrg"></div>
+							<div id="house16" class="house"></div>
+							<div id="hotel16" class="hotel"></div>
 						</div>
-						<div class="midLeftFive">
+						<div class="midLeftFive" onclick="showCard(15)">
 							5
 							<div class="place15"></div>
 						</div>
-						<div class="midLeftSix">
-							6
+						<div class="midLeftSix" onclick="showCard(14)">
 							<div class="place14"></div>
-							<div class="barPur"></div>
+							<div id="house14" class="house"></div>
+							<div id="hotel14" class="hotel"></div>
 						</div>
-						<div class="midLeftSeven">
-							7
+						<div class="midLeftSeven" onclick="showCard(13)">
 							<div class="place13"></div>
-							<div class="barPur"></div>
+							<div id="house13" class="house"></div>
+							<div id="hotel13" class="hotel"></div>
 						</div>
-						<div class="midLeftEight">
+						<div class="midLeftEight" onclick="showCard(12)">
 							8
 							<div class="place12"></div>
 						</div>
-						<div class="midLeftNine">
-							9
+						<div class="midLeftNine" onclick="showCard(11)">
 							<div class="place11"></div>
-							<div class="barPur"></div>
+							<div id="house11" class="house"></div>
+							<div id="hotel11" class="hotel"></div>
 						</div>
 
-						<div class="btmLeft">
+						<div class="btmLeft" onclick="showCard(10)">
 							<div class="place10"><div class="jail"></div></div>
 						</div>
-						<div class="btmOne">
-							1
+						<div class="btmOne" onclick="showCard(9)">
 							<div class="place9"></div>
-							<div class="barTur"></div>
+							<div id="house9" class="house"></div>
+							<div id="hotel9" class="hotel"></div>
 						</div>
-						<div class="btmTwo">
-							2
+						<div class="btmTwo" onclick="showCard(8)">
 							<div class="place8"></div>
-							<div class="barTur"></div>
+							<div id="house8" class="house"></div>
+							<div id="hotel8" class="hotel"></div>
 						</div>
-						<div class="btmThree">
+						<div class="btmThree" onclick="showCard(7)">
 							3
 							<div class="place7"></div>
 						</div>
-						<div class="btmFour">
-							4
+						<div class="btmFour" onclick="showCard(6)">
 							<div class="place6"></div>
-							<div class="barTur"></div>
+							<div id="house6" class="house"></div>
+							<div id="hotel6" class="hotel"></div>
 						</div>
-						<div class="btmFive">
+						<div class="btmFive" onclick="showCard(5)">
 							5
 							<div class="place5"></div>
 						</div>
-						<div class="btmSix">
+						<div class="btmSix" onclick="showCard(4)">
 							6
 							<div class="place4"></div>
 						</div>
-						<div class="btmSeven">
-							7
+						<div class="btmSeven" onclick="showCard(3)">
 							<div class="place3"></div>
-							<div class="barBrw"></div>
+							<div id="house3" class="house"></div>
+							<div id="hotel3" class="hotel"></div>
 						</div>
-						<div class="btmEight">
-							8
+						<div class="btmEight" onclick="showCard(2)">
 							<div class="place2"></div>
 						</div>
-						<div class="btmNine">
-							9
+						<div class="btmNine" onclick="showCard(1)">
 							<div class="place1"></div>
-							<div class="barBrw"></div>
+							<div id="house1" class="house"></div>
+							<div id="hotel1" class="hotel"></div>
 						</div>
-						<div class="btmRight"><div class="place0"></div></div>
+						<div class="btmRight" onclick="showCard(0)">
+							<div class="place0"></div>
+						</div>
 
-						<div class="midRightOne">
-							1
+						<div class="midRightOne" onclick="showCard(31)">
 							<div class="place31"></div>
-							<div class="barGre"></div>
+							<div id="house31" class="house"></div>
+							<div id="hotel31" class="hotel"></div>
 						</div>
-						<div class="midRightTwo">
-							2
+						<div class="midRightTwo" onclick="showCard(32)">
 							<div class="place32"></div>
-							<div class="barGre"></div>
+							<div id="house32" class="house"></div>
+							<div id="hotel32" class="hotel"></div>
 						</div>
-						<div class="midRightThree">
+						<div class="midRightThree" onclick="showCard(33)">
 							3
 							<div class="place33"></div>
 						</div>
-						<div class="midRightFour">
-							4
+						<div class="midRightFour" onclick="showCard(34)">
 							<div class="place34"></div>
-							<div class="barGre"></div>
+							<div id="house34" class="house"></div>
+							<div id="hotel34" class="hotel"></div>
 						</div>
-						<div class="midRightFive">
+						<div class="midRightFive" onclick="showCard(35)">
 							5
 							<div class="place35"></div>
 						</div>
-						<div class="midRightSix">
+						<div class="midRightSix" onclick="showCard(36)">
 							6
 							<div class="place36"></div>
 						</div>
-						<div class="midRightSeven">
-							7
+						<div class="midRightSeven" onclick="showCard(37)">
 							<div class="place37"></div>
-							<div class="barBlu"></div>
+							<div id="house37" class="house"></div>
+							<div id="hotel37" class="hotel"></div>
 						</div>
-						<div class="midRightEight">
+						<div class="midRightEight" onclick="showCard(8)">
 							8
 							<div class="place38"></div>
 						</div>
-						<div class="midRightNine">
-							9
+						<div class="midRightNine" onclick="showCard(39)">
 							<div class="place39"></div>
-							<div class="barBlu"></div>
+							<div id="house39" class="house"></div>
+							<div id="hotel39" class="hotel"></div>
 						</div>
 
 						<div class="center">
@@ -365,6 +365,145 @@
 								<div class="deckCha"></div>
 							</div>
 						</div>
+						<div class="popupBox">
+							<span class="helper"></span>
+							<div>
+								<div class="popupCloseButton">
+									&times;
+								</div>
+								<div id="tilePicCont">
+									<p id="errMsg"></p>
+									<img
+										id="tilePic"
+										class="tilePic"
+										src="../image/tileInfo/Screenshot_1.jpg"
+									/>
+									<p id="msgPara"></p>
+									<div id="hotelBuyBtns">
+										<button
+											id="buildHouseBtn"
+											class="mainBtn"
+											onclick="buildHouses()"
+										>
+											Build House
+										</button>
+										<button
+											id="buildHotelBtn"
+											class="mainBtn"
+											onclick="buildHotel()"
+										>
+											Build Hotel
+										</button>
+									</div>
+								</div>
+
+								<div id="buyPrompt">
+									<p id="buyPara"></p>
+									<button
+										id="confirmBtn"
+										class="mainBtn"
+										onclick="buyConfirmed()"
+									>
+										Buy!
+									</button>
+									<button
+										id="cancellBtn"
+										class="mainBtn"
+										onclick="buyCancell()"
+									>
+										Ill pass thanks dud
+									</button>
+								</div>
+
+								<div id="taxPrompt">
+									<p id="taxPara"></p>
+									<button
+										id="okIgotTaxedBtn"
+										onclick="showPopupBox(0)"
+										class="mainBtn"
+									>
+										Ok
+									</button>
+								</div>
+
+								<div id="tradePrompt">
+									<div id="tradeAsk">
+										<p class="tradeAskWho">Who would you like to trade with?</p>
+										<div id="choseWhoToTrade"></div>
+									</div>
+									<div id="tradeStarted">
+										<div id="tradeSelection">
+											<div id="tradeAsk">
+												<p class="tradeAskWho">
+													What would you like from them?
+												</p>
+												<div id="tradeAwayInitCont">
+													<p>Select:</p>
+													<div id="tradeAwayInit"></div>
+												</div>
+												<div id="tradeAwayConfirmCont">
+													<p>Selected:</p>
+													<div id="tradeAwayConfirm"></div>
+												</div>
+											</div>
+											<div id="tradeOffer">
+												<p class="tradeAskWho">
+													What would you like to offer them?
+												</p>
+												<div id="tradeOfferCont">
+													<p>Select:</p>
+													<div id="tradeOfferInit"></div>
+												</div>
+												<div id="tradeOfferConfirmCont">
+													<p>Selected:</p>
+													<div id="tradeOfferConfirm"></div>
+												</div>
+											</div>
+
+											<input
+												id="moneyBox"
+												type="text"
+												placeholder="Any money?"
+											/>
+											<button
+												id="sendTradelBtn"
+												class="mainBtn"
+												onclick="sendTrade()"
+											>
+												Send trade
+											</button>
+											<button
+												id="cancellTradeBtn"
+												class="mainBtn"
+												onclick="showPopupBox(0)"
+											>
+												Cancel
+											</button>
+										</div>
+									</div>
+								</div>
+								<div id="tradeFromServer">
+									<p id="tradeFromServerP"></p>
+									<div id="askingFromServer"></div>
+									<div id="offerFromServer"></div>
+									<button
+										id="confirmTradeBtn"
+										class="mainBtn"
+										onclick="userConfirmedtrade()"
+									>
+										Confirm</button
+									><button
+										id="cancellTradeBtn"
+										class="mainBtn"
+										onclick="showPopupBox(0)"
+									>
+										Cancel
+									</button>
+								</div>
+
+								<div id="gameOver"></div>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -372,17 +511,43 @@
 				<div class="diceCont" id="diceCont">
 					<img id="dice1" class="dice" src="../image/dice/dice1.JPG" />
 					<img id="dice2" class="dice" src="../image/dice/dice1.JPG" />
-					<input
-						type="button"
-						class="diceButton"
-						value="Throw Dice!"
-						onclick="throwDice()"
-					/>
 				</div>
-				<div class="playerCards">
-					<!-- inf cards-->
-				</div>
+				<div class="buttonCont">
+					<div>
+						<input
+							class="mainBtn"
+							type="button"
+							id="diceBtn"
+							value="Throw Dice!"
+							onclick="throwDice()"
+						/>
+						<input
+							class="mainBtn"
+							type="button"
+							id="tradeBtn"
+							value="Trade!"
+							onclick="tradeProp()"
+						/>
+					</div>
 
+					<div>
+						<input
+							class="mainBtn"
+							type="button"
+							id="endBtn"
+							value="End Turn!"
+							onclick="endTurn()"
+						/>
+						<input
+							class="mainBtn"
+							type="button"
+							id="muteBtn"
+							value="Mute Sounds!"
+							onclick="muteSound()"
+						/>
+					</div>
+				</div>
+				<div class="playerCards"></div>
 				<div id="propTab"></div>
 				<div class="chatCont">
 					<textarea name="chatBox" id="chatBox" readonly></textarea>
@@ -397,6 +562,7 @@
 				</div>
 			</div>
 		</div>
+
 		<div id="footer"></div>
 	</body>
 </html>

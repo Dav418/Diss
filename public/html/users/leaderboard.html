@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<script src="../../javascript/leaderboardFunctions/leaderboard.js"></script>
+		<link rel="stylesheet" href="../css/board.css" />
+		<script src="../../javascript/lib/jquery.js"></script>
+
+		<title>Leaderboard</title>
+	</head>
+	<body>
+		<script>
+			let list = "{{list}}";
+			console.log(list);
+		</script>
+		<div class="leaderboardDiv" id="leaderboardDiv">
+			<table class="leaderboard" id="leaderboard">
+				{% for u in list %}
+				<tr>
+					<th>Name</th>
+					<th>Wins</th>
+					<th>Losses</th>
+					<th>Win %</th>
+					<th>Money Won</th>
+				</tr>
+				<tr>
+					<td>
+						{{u.name}}
+					</td>
+					<td>
+						{{u.w}}
+					</td>
+					<td>
+						{{u.l}}
+					</td>
+					<td>
+						{{u.w}} / {{u.l}}
+					</td>
+					<td>
+						{{u.m}}
+					</td>
+				</tr>
+				{%endfor%}
+			</table>
+		</div>
+	</body>
+</html>

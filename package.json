@@ -4,7 +4,7 @@
 	"description": "This is the repo for my final year project. This is a game of Monopoly, that can be played with 3 other players (4 player per game).",
 	"main": "app.js",
 	"scripts": {
-		"test": "node app.js"
+		"start": "node app.js"
 	},
 	"author": "Dawid Gorski",
 	"license": "ISC",

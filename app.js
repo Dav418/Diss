@@ -4,7 +4,12 @@ var path = require("path");
 
 const session = require("express-session");
 
-var server = app.listen(3000);
+let port = process.env.PORT;
+if (port == null || port == "") {
+  port = 8000;
+}
+
+var server = app.listen(port);
 //var io = require('socket.io').listen(server);
 var socketConn = require("./private/socketFiles/socketFunctions.js").listen(
 	server
